@@ -37,21 +37,21 @@ from bublik.settings import EMAIL_FROM, SIMPLE_JWT
 
 
 __all__ = [
-    'RegisterView',
-    'LogInView',
-    'ProfileViewSet',
-    'RefreshTokenView',
-    'LogOutView',
-    'ForgotPasswordView',
-    'ForgotPasswordResetView',
-    'AdminViewSet',
+    "RegisterView",
+    "LogInView",
+    "ProfileViewSet",
+    "RefreshTokenView",
+    "LogOutView",
+    "ForgotPasswordView",
+    "ForgotPasswordResetView",
+    "AdminViewSet",
 ]
 
 
 def get_user_info_from_access_token(access_token):
     token_backend = TokenBackend(
-        algorithm=SIMPLE_JWT['ALGORITHM'],
-        signing_key=SIMPLE_JWT['SIGNING_KEY'],
+        algorithm=SIMPLE_JWT["ALGORITHM"],
+        signing_key=SIMPLE_JWT["SIGNING_KEY"],
     )
     return token_backend.decode(access_token, verify=True)
 
@@ -62,24 +62,24 @@ def admin_required(function):
         request = None
 
         # Check if 'request' is present in the keyword arguments
-        if 'request' in kwargs and isinstance(kwargs['request'], Request):
-            request = kwargs['request']
+        if "request" in kwargs and isinstance(kwargs["request"], Request):
+            request = kwargs["request"]
         # Check if the first argument is an instance of Request
         elif args and isinstance(args[0], Request):
             request = args[0]
         # Check if the first argument has a 'request' attribute (ViewSet case)
-        elif hasattr(args[0], 'request') and isinstance(args[0].request, Request):
+        elif hasattr(args[0], "request") and isinstance(args[0].request, Request):
             request = args[0].request
 
         if request:
-            access_token = request.COOKIES.get('access_token')
+            access_token = request.COOKIES.get("access_token")
             try:
                 # get user
                 user_info = get_user_info_from_access_token(access_token=access_token)
-                user = User.objects.get(pk=user_info['user_id'])
+                user = User.objects.get(pk=user_info["user_id"])
             except TokenBackendError:
                 return Response(
-                    {'message': 'Not Authenticated'},
+                    {"message": "Not Authenticated"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
@@ -89,13 +89,13 @@ def admin_required(function):
                 return function(*args, **kwargs)
 
             return Response(
-                {'message': 'You are not authorized to perform this action'},
+                {"message": "You are not authorized to perform this action"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
         # Handle regular function call without a request object
         return Response(
-            {'message': 'Wrong request'},
+            {"message": "Wrong request"},
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -113,7 +113,7 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.create(request.data)
         send_verification_link_mail(request, user)
         return Response(
-            {'message': 'A verification link has been sent to your email address'},
+            {"message": "A verification link has been sent to your email address"},
             status=status.HTTP_200_OK,
         )
 
@@ -122,8 +122,8 @@ class ActivateView(APIView):
     def get(self, request, *args, **kwargs):
         email_verification_token = EmailVerificationTokenGenerator()
 
-        user_id_b64 = kwargs['user_id_b64']
-        token = kwargs['token']
+        user_id_b64 = kwargs["user_id_b64"]
+        token = kwargs["token"]
         try:
             uid = urlsafe_base64_decode(user_id_b64).decode()
             user = User.objects.get(pk=uid)
@@ -134,11 +134,11 @@ class ActivateView(APIView):
             user.is_active = True
             user.save()
             return Response(
-                {'message': 'The email is verified. You are registered.'},
+                {"message": "The email is verified. You are registered."},
                 status=status.HTTP_200_OK,
             )
         return Response(
-            {'message': 'Invalid email verification link'},
+            {"message": "Invalid email verification link"},
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -148,13 +148,13 @@ class LogInView(TokenObtainPairView):
 
     def post(self, request):
         # get email and password from request
-        email = request.data.get('email')
-        password = request.data.get('password')
+        email = request.data.get("email")
+        password = request.data.get("password")
 
         # check if email and password are provided
         if not email or not password:
             return Response(
-                {'message': 'Please provide both email and password'},
+                {"detail": "Please provide both email and password"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -164,7 +164,7 @@ class LogInView(TokenObtainPairView):
         # check if user is valid
         if not user:
             return Response(
-                {'message': 'Invalid credentials'},
+                {"message": "Invalid credentials"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -174,19 +174,19 @@ class LogInView(TokenObtainPairView):
         response = Response()
         # set cookies
         response.set_cookie(
-            key='refresh_token',
+            key="refresh_token",
             value=str(refresh_token),
             httponly=True,
-            samesite='Strict',
+            samesite="Strict",
         )
         response.set_cookie(
-            key='access_token',
+            key="access_token",
             value=str(access_token),
             httponly=True,
-            samesite='Strict',
+            samesite="Strict",
         )
         response.data = {
-            'user': UserSerializer(user).data,
+            "user": UserSerializer(user).data,
         }
         response.status_code = status.HTTP_200_OK
         return response
@@ -194,85 +194,60 @@ class LogInView(TokenObtainPairView):
 
 class ProfileViewSet(GenericViewSet):
     def get_serializer_class(self):
-        if self.action == 'password_reset':
+        if self.action == "password_reset":
             return PasswordResetSerializer
-        if self.action == 'update_info':
+        if self.action == "update_info":
             return UpdateUserSerializer
         return UserSerializer
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=["get"])
     def info(self, request):
         # get access token from cookies
-        access_token = request.COOKIES.get('access_token')
+        access_token = request.COOKIES.get("access_token")
         try:
             # get user info using access token
             user_info = get_user_info_from_access_token(access_token)
             # get user object
-            user = User.objects.get(pk=user_info['user_id'])
+            user = User.objects.get(pk=user_info["user_id"])
             serializer_class = self.get_serializer_class()
             return Response(serializer_class(user).data, status=status.HTTP_200_OK)
         except TokenBackendError:
             return Response(
-                {'message': 'Not Authenticated'},
+                {"message": "Not Authenticated"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=["post"])
     def password_reset(self, request):
         # get access token from cookies
-        access_token = request.COOKIES.get('access_token')
+        access_token = request.COOKIES.get("access_token")
         try:
             # get user info using access token
             user_info = get_user_info_from_access_token(access_token)
             # get user object
-            user = User.objects.get(pk=user_info['user_id'])
+            user = User.objects.get(pk=user_info["user_id"])
 
             # check current password and validate new password
             passwords = request.data
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=passwords)
-            serializer.current_password_check(user, passwords['current_password'])
+            serializer.current_password_check(user, passwords["current_password"])
             serializer.validate_passwords(passwords)
 
             # password reset
-            user.set_password(passwords['new_password'])
+            user.set_password(passwords["new_password"])
             user.save()
 
             # blacklist old refresh tokens
             RefreshToken.for_user(user).blacklist()
 
             return Response(
-                {'message': 'Password reset successfully'},
+                {"message": "Password reset successfully"},
                 status=status.HTTP_200_OK,
             )
         except TokenBackendError:
             return Response(
-                {'message': 'Not Authenticated'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-    @action(detail=False, methods=['post'])
-    def update_info(self, request):
-        # get access token from cookies
-        access_token = request.COOKIES.get('access_token')
-        try:
-            # get user info using access token
-            user_info = get_user_info_from_access_token(access_token)
-            # get user object
-            user = User.objects.get(pk=user_info['user_id'])
-            serializer_class = self.get_serializer_class()
-            # check if new data is valid
-            serializer = serializer_class(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            # update user
-            updated_user = serializer.update(
-                user=user,
-                data=request.data,
-            )
-            return Response(UserSerializer(updated_user).data, status=status.HTTP_200_OK)
-        except TokenBackendError:
-            return Response(
-                {'message': 'Not Authenticated'},
+                {"message": "Not Authenticated"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -283,7 +258,7 @@ class RefreshTokenView(TokenRefreshView):
     def post(self, request):
         try:
             # get refresh token from request cookies
-            refresh_token = request.COOKIES.get('refresh_token')
+            refresh_token = request.COOKIES.get("refresh_token")
             refresh_token = RefreshToken(refresh_token)
 
             # verify refresh token
@@ -291,14 +266,14 @@ class RefreshTokenView(TokenRefreshView):
                 refresh_token.verify()
             except TokenError:
                 return Response(
-                    {'message': 'Not a valid refresh token'},
+                    {"message": "Not a valid refresh token"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
             access_token = refresh_token.access_token
 
             # get user info and User object
             user_info = get_user_info_from_access_token(str(access_token))
-            user = User.objects.get(pk=user_info['user_id'])
+            user = User.objects.get(pk=user_info["user_id"])
 
             # blacklist refresh token
             refresh_token.blacklist()
@@ -310,25 +285,25 @@ class RefreshTokenView(TokenRefreshView):
 
             # invalidate old cookies and set new ones
             response.set_cookie(
-                key='access_token',
+                key="access_token",
                 value=str(access_token),
                 httponly=True,
-                samesite='Strict',
+                samesite="Strict",
             )
             response.set_cookie(
-                key='refresh_token',
+                key="refresh_token",
                 value=str(refresh_token),
                 httponly=True,
-                samesite='Strict',
+                samesite="Strict",
             )
             response.data = {
-                'message': 'Successfully refreshed token',
+                "message": "Successfully refreshed token",
             }
             response.status_code = status.HTTP_200_OK
             return response
         except Exception as e:
             return Response(
-                {'message': 'Refresh process failed', 'error': str(e)},
+                {"message": "Refresh process failed", "error": str(e)},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -336,13 +311,13 @@ class RefreshTokenView(TokenRefreshView):
 class LogOutView(APIView):
     def post(self, request):
         try:
-            refresh_token = request.COOKIES.get('refresh_token')
+            refresh_token = request.COOKIES.get("refresh_token")
             refresh_token = RefreshToken(refresh_token)
             try:
                 refresh_token.verify()
             except TokenError:
                 return Response(
-                    {'message': 'Not a valid refresh token'},
+                    {"message": "Not a valid refresh token"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
@@ -350,18 +325,18 @@ class LogOutView(APIView):
 
             # invalidate old cookies
             response = Response()
-            response.delete_cookie('refresh_token')
-            response.delete_cookie('access_token')
+            response.delete_cookie("refresh_token")
+            response.delete_cookie("access_token")
 
             response.data = {
-                'message': 'Successfully logged out',
+                "message": "Successfully logged out",
             }
             response.status_code = status.HTTP_200_OK
 
             return response
         except Exception as e:
             return Response(
-                {'message': 'Logout process failed', 'error': str(e)},
+                {"message": "Logout process failed", "error": str(e)},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -372,13 +347,13 @@ class ForgotPasswordView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
+        email = serializer.validated_data["email"]
 
         try:
             user = User.objects.get(email=email)
         except ObjectDoesNotExist:
             return Response(
-                {'message': 'No user found with this email'},
+                "No user found with this email",
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -388,19 +363,19 @@ class ForgotPasswordView(generics.CreateAPIView):
         access_token = token_serializer.get_token(user).access_token
 
         # construct the reset link URL
-        endpoint = f'v2/auth/forgot_password/password_reset/{user_id_b64}/{access_token}/'
+        endpoint = f"v2/auth/forgot_password/password_reset/{user_id_b64}/{access_token}/"
         reset_link = build_absolute_uri(request, endpoint)
 
         # send the reset link to the user
         send_mail(
-            subject='Password Reset',
-            message=f'Click the following link to reset your password: {reset_link}',
+            subject="Password Reset",
+            message=f"Click the following link to reset your password: {reset_link}",
             from_email=EMAIL_FROM,
             recipient_list=[user.email],
         )
 
         return Response(
-            {'message': 'Password reset link sent successfully'},
+            {"message": "Password reset link sent successfully"},
             status=status.HTTP_200_OK,
         )
 
@@ -409,8 +384,8 @@ class ForgotPasswordResetView(generics.UpdateAPIView):
     serializer_class = PasswordResetSerializer
 
     def update(self, request, *args, **kwargs):
-        user_id_b64 = kwargs['user_id_b64']
-        access_token = kwargs['token']
+        user_id_b64 = kwargs["user_id_b64"]
+        access_token = kwargs["token"]
         try:
             uid = urlsafe_base64_decode(user_id_b64).decode()
             user = User.objects.get(pk=uid)
@@ -423,34 +398,28 @@ class ForgotPasswordResetView(generics.UpdateAPIView):
             serializer = self.serializer_class(data=new_passwords)
             serializer.validate_passwords(new_passwords)
             # password reset
-            user.set_password(new_passwords['new_password'])
+            user.set_password(new_passwords["new_password"])
             user.save()
 
             # blacklist old refresh tokens
             RefreshToken.for_user(user).blacklist()
 
-            return Response(
-                {'message': 'Password reset successfully'},
-                status=status.HTTP_200_OK,
-            )
-        return Response(
-            {'message': 'Invalid reset link'},
-            status=status.HTTP_403_FORBIDDEN,
-        )
+            return Response("Password reset successfully", status=status.HTTP_200_OK)
+        return Response("Invalid reset link", status=status.HTTP_403_FORBIDDEN)
 
 
 class AdminViewSet(GenericViewSet):
     def get_serializer_class(self):
-        if self.action == 'create_user':
+        if self.action == "create_user":
             return RegisterSerializer
-        if self.action == 'update_user':
+        if self.action == "update_user":
             return UpdateUserSerializer
-        if self.action == 'deactivate_user':
+        if self.action == "deactivate_user":
             return UserEmailSerializer
         return UserSerializer
 
     @admin_required
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=["post"])
     def create_user(self, request):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data)
@@ -459,15 +428,15 @@ class AdminViewSet(GenericViewSet):
         user = serializer.create(request.data)
         send_verification_link_mail(request, user)
         return Response(
-            {'message': 'A verification link has been sent to the user\'s email address'},
+            {"message": "A verification link has been sent to the user's email address"},
             status=status.HTTP_200_OK,
         )
 
     @admin_required
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=["post"])
     def update_user(self, request):
         # get user to edit
-        edit_user = User.objects.get(email=request.data.get('email'))
+        edit_user = User.objects.get(email=request.data.get("email"))
         # get serializer class
         serializer_class = self.get_serializer_class()
         # check if new data is valid
@@ -481,15 +450,15 @@ class AdminViewSet(GenericViewSet):
         return Response(UserSerializer(updated_user).data, status=status.HTTP_200_OK)
 
     @admin_required
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=["post"])
     def deactivate_user(self, request):
         # get user to delete
-        deactivate_user = User.objects.get(email=request.data.get('email'))
+        deactivate_user = User.objects.get(email=request.data.get("email"))
         # deactivate user
         deactivate_user.is_active = False
         deactivate_user.save()
         return Response(
-            {'message': 'The user was deactivated'},
+            {"message": "The user was deactivated"},
             status=status.HTTP_200_OK,
         )
 
