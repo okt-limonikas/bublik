@@ -12,6 +12,7 @@ from .auth import (
     RefreshTokenView,
     RegisterView,
 )
+from .config import ConfigViewSet
 from .comments import TestCommentViewSet
 from .dashboard import (
     DashboardFormatting,
@@ -74,5 +75,6 @@ __all__ = [
     'clear_all_runs_stats_cache',
     'ReportViewSet',
     'URLShortnerView',
+    'ConfigViewSet',
     'TestCommentViewSet',
 ]

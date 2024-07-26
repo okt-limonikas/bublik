@@ -31,6 +31,7 @@ api_v2_router.register(r'importruns', api_v2.ImportrunsViewSet, 'importruns')
 api_v2_router.register(r'auth/profile', api_v2.ProfileViewSet, 'profile')
 api_v2_router.register(r'auth/admin', api_v2.AdminViewSet, 'admin')
 api_v2_router.register(r'report', api_v2.ReportViewSet, 'report')
+api_v2_router.register(r'config', api_v2.ConfigViewSet, 'config')
 api_v2_router.register(
     r'tests/(?P<test_id>[0-9]+)/comments',
     api_v2.TestCommentViewSet,
