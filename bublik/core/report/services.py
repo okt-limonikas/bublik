@@ -4,8 +4,6 @@
 import contextlib
 
 from itertools import groupby
-import json
-import os
 
 from django.conf import settings
 
