@@ -44,6 +44,7 @@ FROM base AS runner
 WORKDIR /app
 
 COPY . ./bublik
+COPY ./bublik-conf ./bublik
 
 # 3. Create user and set permissions
 RUN mkdir -p bublik/logs
