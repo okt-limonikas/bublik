@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
+    entrypoint: ./entrypoint.sh
     environment:
       - PER_CONF_DIR=${PER_CONF_DIR}
       - SECRET_KEY=${SECRET_KEY}
@@ -200,7 +201,7 @@ services:
     container_name: nginx
     build:
       context: .
-      dockerfile: bublik/nginx/Dockerfile.dev
+      dockerfile: ./nginx/Dockerfile.dev
       args:
         - URL_PREFIX=${URL_PREFIX}
     ports:
