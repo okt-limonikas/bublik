@@ -252,6 +252,7 @@ services:
             - node_modules
         - action: rebuild
           path: ./bublik-ui/package.json
+
   mailpit:
     image: axllent/mailpit
     container_name: mailpit
@@ -262,8 +263,55 @@ services:
     environment:
       - MP_SMTP_TLS_REQUIRED=${MP_SMTP_TLS_REQUIRED:-false}
 
+  openldap:
+    container_name: openldap
+    image: osixia/openldap:latest
+    environment:
+      - LDAP_ORGANISATION=Example Inc
+      - LDAP_DOMAIN=example.com
+      - LDAP_BASE_DN=dc=example,dc=com
+      - LDAP_ADMIN_PASSWORD=admin_secret
+      - LDAP_CONFIG_PASSWORD=config_secret
+      - LDAP_TLS=false
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - ldap_data:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+
+  phpldapadmin:
+    container_name: phpldapadmin
+    image: osixia/phpldapadmin:latest
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+    ports:
+      - "8080:80"
+    depends_on:
+      - openldap
+
+  kdc:
+    container_name: kdc
+    image: gcavalcante8808/krb5-server
+    environment:
+      - KRB5_REALM=EXAMPLE.COM
+      - KRB5_KDC=kdc.example.com
+      - KRB5_PASS=your_master_password
+    ports:
+      - "88:88"
+      - "88:88/udp"
+      - "749:749"
+    volumes:
+      - kdc_data:/var/lib/krb5kdc
+    depends_on:
+      - openldap
+
 volumes:
   db_data:
   flower_data:
   static_data:
   logs_data:
+  kdc_data:
+  ldap_data:
+  ldap_config:
