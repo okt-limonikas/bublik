@@ -60,6 +60,7 @@ FROM node:22.13-alpine AS docs-builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+RUN npm i -g corepack@latest
 RUN corepack enable
 
 ARG URL_PREFIX
