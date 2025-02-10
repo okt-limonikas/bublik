@@ -40,6 +40,7 @@ RUN apt-get update \
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN chmod +x /uv-installer.sh && /uv-installer.sh && rm /uv-installer.sh
 ENV PATH="/root/.local/bin/:$PATH"
+ENV UV_HTTP_TIMEOUT=2400
 
 # Install dependencies using uv pip
 RUN uv pip install --system --no-cache-dir meson==1.6.1 watchfiles==1.0.4
