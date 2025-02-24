@@ -87,7 +87,6 @@ WORKDIR /app
 COPY --from=docs-builder /app/build /app/bublik/docs
 
 COPY . ./bublik
-COPY ./bublik-conf ./bublik
 
 RUN mkdir -p bublik/logs && chmod +x ./bublik/entrypoint.sh
 
