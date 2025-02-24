@@ -295,40 +295,10 @@ ENABLE_JSON_LOGS_PROXY = os.getenv('ENABLE_JSON_LOGS_PROXY', 'False').lower() in
     '1',
     'yes',
 )
+
 SECURE_HTTP = os.getenv('SECURE_HTTP', 'False').lower() in ('1', 'true', 'yes')
 
-# Identify a project holding Bublik:
-# - to use per-project variables just doing 'import per_conf'
-# - to get per-project conf files
-#
 PER_CONF_DIR = os.getenv('PER_CONF_DIR', '/app/bublik-conf')
-
-
-def get_module(name, location):
-    if not os.path.isfile(location):
-        msg = f'unable to get {location}'
-        raise FileNotFoundError(msg)
-    spec = importlib.util.spec_from_file_location(name, location)
-    module = importlib.util.module_from_spec(spec)  # type: ignore  # noqa: PGH003
-    spec.loader.exec_module(module)  # type: ignore  # noqa: PGH003
-    sys.modules[name] = module
-
-
-get_module('per_conf', f'{PER_CONF_DIR}/per_conf.py')
-get_module('references', f'{PER_CONF_DIR}/references.py')
-
-import per_conf  # type: ignore  # noqa: PGH003
-
-URL_PREFIX_BY_UI_VERSION = {
-    1: 'v1',
-    2: 'v2',
-}
-
-UI_VERSION = getattr(per_conf, 'UI_VERSION', 2)
-
-UI_PREFIX = URL_PREFIX_BY_UI_VERSION.get(UI_VERSION, '')
-
-CSRF_TRUSTED_ORIGINS = getattr(per_conf, 'CSRF_TRUSTED_ORIGINS', [])
 
 ITEMS_PER_PAGE = 25
 
