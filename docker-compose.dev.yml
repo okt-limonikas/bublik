@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
       args:
         - URL_PREFIX=${URL_PREFIX}
         - DOCS_URL=${DOCS_URL}
@@ -72,6 +73,7 @@ services:
             - bublik-ui
         - path: ./requirements.txt
           action: rebuild
+
   db:
     container_name: postgres
     image: postgres
@@ -83,20 +85,24 @@ services:
       - db_data:/var/lib/postgresql/data/
     ports:
       - 5432:5432
+
   redis:
     container_name: redis
     image: redis
+
   rabbitmq:
     container_name: rabbitmq
     image: rabbitmq:3-management
     ports:
       - 5672:5672
       - 15672:15672
+
   celery:
     container_name: celery
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
       args:
         - URL_PREFIX=${URL_PREFIX}
         - DOCS_URL=${DOCS_URL}
@@ -152,11 +158,13 @@ services:
             - bublik-ui
         - path: ./requirements.txt
           action: rebuild
+
   flower:
     container_name: flower
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
       args:
         - URL_PREFIX=${URL_PREFIX}
         - DOCS_URL=${DOCS_URL}
@@ -215,6 +223,7 @@ services:
             - bublik-ui
         - path: ./requirements.txt
           action: rebuild
+
   nginx:
     container_name: nginx
     build:
@@ -234,6 +243,7 @@ services:
       - django
       - flower
       - bublik-ui
+
   bublik-ui:
     container_name: bublik-ui
     build:
@@ -252,6 +262,7 @@ services:
             - node_modules
         - action: rebuild
           path: ./bublik-ui/package.json
+
   mailpit:
     image: axllent/mailpit
     container_name: mailpit
@@ -261,6 +272,25 @@ services:
       - 1025:1025
     environment:
       - MP_SMTP_TLS_REQUIRED=${MP_SMTP_TLS_REQUIRED:-false}
+
+  te-log-server:
+    container_name: te-log-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: log-server
+    ports:
+      - "4321:80"
+    volumes:
+      - ./te-logs/logs:/home/te-logs/logs:rw
+      - ./te-logs/incoming:/home/te-logs/incoming:rw
+      - ./te-logs/bad:/home/te-logs/bad:rw
+    environment:
+      - APACHE_RUN_USER=www-data
+      - APACHE_RUN_GROUP=www-data
+      - APACHE_LOG_DIR=/var/log/apache2
+      - TE_INSTALL=/app/te/build/inst
+    restart: unless-stopped
 
 volumes:
   db_data:

@@ -91,3 +91,64 @@ COPY . ./bublik
 RUN mkdir -p bublik/logs && chmod +x ./bublik/entrypoint.sh
 
 WORKDIR /app/bublik
+
+###########################################
+#           Log Server                    #
+###########################################
+FROM base AS log-server
+
+RUN apt-get update && apt-get install -y \
+    apache2 \
+    file \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable CGI module
+RUN a2enmod cgid
+
+# Create necessary directories
+RUN mkdir -p \
+    /home/te-logs/cgi-bin \
+    /home/te-logs/logs \
+    /home/te-logs/incoming \
+    /home/te-logs/bad
+
+# Copy CGI scripts and templates
+COPY ./test-environment/tools/log_server/te-logs-error404.template /home/te-logs/cgi-bin/te-logs-error404
+COPY ./test-environment/tools/log_server/te-logs-index.template /home/te-logs/cgi-bin/te-logs-index
+COPY ./test-environment/tools/log_server/publish-logs-unpack.sh /home/te-logs/bin/
+COPY ./test-environment/tools/log_server/publish-incoming-logs.template /home/te-logs/bin/publish-incoming-logs
+
+# Replace placeholders in CGI scripts and publish-incoming-logs
+RUN sed -i \
+    -e "s,@@TE_INSTALL@@,/app/te/build/inst,g" \
+    -e "s,/srv/logs,/home/te-logs/logs,g" \
+    -e "s,root_dir=\"/srv/logs\",root_dir=\"/home/te-logs/logs\",g" \
+    -e "s,@@BUBLIK_URL@@,http://django:8000,g" \
+    -e "s,@@LOGS_URL@@,http://te-log-server/logs,g" \
+    -e "s,@@LOGS_DIR@@,/home/te-logs/logs,g" \
+    -e "s,@@LOGS_INCOMING@@,/home/te-logs/incoming,g" \
+    -e "s,@@LOGS_BAD@@,/home/te-logs/bad,g" \
+    /home/te-logs/cgi-bin/te-logs-index \
+    /home/te-logs/cgi-bin/te-logs-error404 \
+    /app/te/build/inst/default/bin/te-logs-error404.sh \
+    /app/te/build/inst/default/bin/te-logs-index.sh \
+    /home/te-logs/bin/publish-incoming-logs
+
+RUN chmod 750 /home/te-logs/cgi-bin/* /home/te-logs/bin/* \
+    && echo "ServerName localhost" >> /etc/apache2/apache2.conf \
+    && chown -R www-data:www-data /home/te-logs
+
+COPY ./test-environment/tools/log_server/apache2-te-log-server.conf.template /etc/apache2/conf-available/te-logs.conf
+
+RUN sed -i \
+    -e "s,@@LOGS_CGI_BIN@@,/home/te-logs/cgi-bin,g" \
+    -e "s,@@LOGS_DIR@@,/home/te-logs/logs,g" \
+    -e "s,@@LOGS_URL_PATH@@,/logs,g" \
+    /etc/apache2/conf-available/te-logs.conf
+
+RUN a2enconf te-logs
+
+EXPOSE 80
+
+CMD ["apache2ctl", "-D", "FOREGROUND"]

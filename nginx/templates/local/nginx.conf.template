@@ -10,6 +10,10 @@ upstream bublik-ui {
     server bublik-ui:4200;
 }
 
+upstream te-log-server {
+    server te-log-server:80;
+}
+
 map $http_upgrade $connection_upgrade {
     default upgrade;
     ''      close;
@@ -37,6 +41,22 @@ server {
     
     location ${URL_PREFIX}/v2/ {
         proxy_pass http://bublik-ui;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400;
+    }
+
+    location ${URL_PREFIX}/logs/ {
+        proxy_pass http://te-log-server;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400;
+    }
+
+    location ${URL_PREFIX}/icons/ {
+        proxy_pass http://te-log-server;
 
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
