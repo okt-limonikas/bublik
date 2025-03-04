@@ -1,0 +1,63 @@
+version: '3'
+
+tasks:
+  init:
+    desc: Initialize Git submodules
+    cmds:
+      - git submodule init
+      - git submodule update --init --recursive
+
+  update:
+    desc: Update Git submodules to latest commits
+    cmds:
+      - git submodule update --remote
+
+  env:
+    desc: Create .env file from .local.env
+    cmds:
+      - cp .env.local .env
+
+  docker:dev:watch:
+    desc: Start Docker development environment in watch mode
+    deps: [env]
+    cmds:
+      - docker compose -f docker-compose.dev.yml up --build --watch
+      - echo "🚀 Docker development environment started at http://localhost"
+
+  docker:dev:up:
+    desc: Start Docker development environment
+    deps: [env]
+    cmds:
+      - docker compose -f docker-compose.dev.yml up --build -d
+      - echo "🚀 Docker development environment started at http://localhost"
+
+  docker:dev:down:
+    desc: Stop Docker development environment
+    cmds:
+      - docker compose -f docker-compose.dev.yml down
+
+  docker:dev:clean:
+    desc: Clean Docker development environment (images, volumes, and logs)
+    cmds:
+      - |
+        echo "⚠️  This will remove all containers, volumes, and unused images."
+        echo "Are you sure you want to continue? [y/N]"
+        read -r response
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+          docker compose -f docker-compose.dev.yml down -v
+          docker system prune -f
+        else
+          echo "Operation cancelled."
+        fi
+
+  docker:dev:import-incoming-logs:
+    desc: Import Incoming Logs
+    cmds:
+      - docker exec -it te-log-server /bin/bash -c "cd /home/te-logs/bin && ./publish-incoming-logs"
+
+  docker:dev:import-logs:
+    desc: Import logs from a specific file inside container
+    requires:
+      vars: [FILE]
+    cmds:
+      - docker exec -it te-log-server /bin/bash -c "cd /home/te-logs/bin && ./publish-logs-unpack -s /home/te-logs/logs -B /home/te-logs/bad -i {{.FILE}}"
