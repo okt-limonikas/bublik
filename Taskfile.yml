@@ -1,0 +1,394 @@
+version: '3'
+
+dotenv:
+  - .env
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  ###########################################
+  #         Git                             #
+  ###########################################
+  init:
+    desc: Initialize Git submodules
+    aliases: [i]
+    status:
+      - |
+        # Check if all submodules are initialized and up to date
+        test -z "$(git submodule status | grep '^-\|^+')"
+    cmds:
+      - git submodule init
+      - git submodule update --init --recursive
+
+  update:
+    desc: Update Git submodules to latest commits
+    aliases: [u]
+    status:
+      - |
+        # Check if any submodule needs updating
+        test -z "$(git submodule status | grep '^+')"
+    cmds:
+      - git submodule update --remote
+
+  ###########################################
+  #         Docker Environment              #
+  ###########################################
+  docker:setup:
+    desc: Setup Docker environment (copy env and settings files)
+    aliases: [setup]
+    deps: [init, system:check-deps, docker:check-deps]
+    status:
+      - test -f .env # only create .env on first run, after user should update it manually
+      - test -f bublik/settings.py && test "$(stat -c %Y templates/docker-settings.py.template)" -le "$(stat -c %Y bublik/settings.py)"
+    cmds:
+      - |
+        echo "📝 Copying .env.local to .env..."
+        cp .env.local .env
+        if [ -f "bublik/settings.py" ]; then
+          echo "⚠️  Removing existing settings.py..."
+          rm bublik/settings.py
+        fi
+        echo "📝 Copying docker settings template..."
+        cp templates/docker-settings.py.template bublik/settings.py
+        echo "✅ Docker environment setup complete!"
+
+  docker:dev:watch:
+    desc: Start Docker development environment in watch mode
+    deps: [docker:setup]
+    aliases: [dev:watch]
+    cmds:
+      - docker compose -f docker-compose.dev.yml up --build --watch
+      - echo "🚀 Docker development environment started at http://localhost"
+
+  docker:dev:up:
+    desc: Start Docker development environment
+    deps: [docker:setup]
+    aliases: [dev:up]
+    cmds:
+      - docker compose -f docker-compose.dev.yml up --build -d
+      - echo "🚀 Docker development environment started at http://localhost"
+
+  docker:up:
+    desc: Start Docker production environment
+    deps: [docker:setup]
+    aliases: [up]
+    cmds:
+      - docker compose -f docker-compose.yml up --build -d
+      - echo "🚀 Docker production environment started at http://localhost"
+
+  docker:down:
+    desc: Stop Docker development environment
+    aliases: [down]
+    cmds:
+      - docker compose -f docker-compose.yml down
+
+  docker:dev:down:
+    desc: Stop Docker development environment
+    aliases: [dev:down]
+    cmds:
+      - docker compose -f docker-compose.dev.yml down
+
+  import-logs:
+    desc: Import logs from a specified .tar file
+    summary: |
+      Import logs from a specified .tar file
+      Usage: task import-logs -- ./path/to/file.tar
+    vars:
+      FILE: '{{.CLI_ARGS}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "❌ No file specified"
+          echo "Usage: task import-logs -- ./path/to/file.tar"
+          exit 1
+        fi
+
+        if [ ! -f "{{.FILE}}" ]; then
+          echo "❌ File not found: {{.FILE}}"
+          exit 1
+        fi
+
+        FILENAME=$(basename "{{.FILE}}")
+        echo "📝 Copying $FILENAME to container..."
+        docker cp "{{.FILE}}" te-log-server:/home/te-logs/incoming/
+
+        echo "🔄 Processing logs..."
+
+        # Kinda hacky, but it works
+        # Fix permissions before processing
+        docker exec te-log-server chown -R www-data:www-data /home/te-logs/incoming/
+        docker exec -it te-log-server /bin/bash -c "cd /home/te-logs/bin && ./publish-incoming-logs"
+        # Fix permissions after processing
+        docker exec te-log-server chown -R www-data:www-data /home/te-logs/logs/
+        docker exec te-log-server chmod -R 755 /home/te-logs/logs/
+
+  docker:nuke:
+    prompt: |
+      This will remove all containers, volumes, and unused images.
+      YOU WILL LOSE ALL YOUR DATA!
+      Are you sure you want to continue? [y/N]
+    desc: Clean Docker environment (images, volumes, and logs)
+    aliases: [nuke]
+    cmds:
+      - docker compose -f docker-compose.dev.yml down -v
+      - docker compose -f docker-compose.yml down -v
+      - docker system prune -af
+      - test -f .env && rm .env
+
+  ###########################################
+  #         Deps                          #
+  ###########################################
+  system:check-deps:
+    desc: Check if system dependencies are installed
+    cmds:
+      - |
+        echo "🔍 Checking system dependencies..."
+        if ! command -v jq &> /dev/null; then
+          echo "⚠️  jq is not installed!"
+          echo "To install jq:"
+          echo "  sudo apt-get install jq"
+          exit 1
+        fi
+        if ! command -v curl &> /dev/null; then
+          echo "⚠️  curl is not installed!"
+          echo "To install curl:"
+          echo "  sudo apt-get install curl"
+          exit 1
+        fi
+        echo "✅ All system dependencies are installed"
+
+  docker:check-deps:
+    desc: Check if Docker and Docker Compose are installed
+    internal: true
+    cmds:
+      - |
+        echo "🔍 Checking Docker installation..."
+        if ! command -v docker &> /dev/null; then
+          echo "⚠️  Docker is not installed!"
+          echo ""
+          echo "Quick Install (using convenience script):"
+          echo "  curl -fsSL https://get.docker.com -o get-docker.sh"
+          echo "  sudo sh get-docker.sh"
+          echo ""
+          echo "📚 For more installation options, visit:"
+          echo "  https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script"
+          echo ""
+          echo "🔧 After installation, don't forget the post-installation steps:"
+          echo "  1. Add your user to docker group:"
+          echo "     sudo groupadd docker"
+          echo "     sudo usermod -aG docker \$USER"
+          echo "     newgrp docker"
+          echo ""
+          echo "  2. Configure Docker to start on boot:"
+          echo "     sudo systemctl enable docker.service"
+          echo "     sudo systemctl enable containerd.service"
+          echo ""
+          echo "📚 For detailed post-installation steps, visit:"
+          echo "  https://docs.docker.com/engine/install/linux-postinstall/"
+          exit 1
+        fi
+
+        if ! docker compose version &> /dev/null; then
+          echo "⚠️  Docker Compose plugin is not installed!"
+          echo "To install Docker Compose plugin:"
+          echo "  sudo apt-get install docker-compose-plugin"
+          echo ""
+          echo "For more installation options, visit:"
+          echo "  https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script"
+          exit 1
+        fi
+
+        # Check if user is in docker group
+        if ! groups | grep -q "docker"; then
+          echo "⚠️  Your user is not in the docker group!"
+          echo "This means you'll need to use sudo for docker commands."
+          echo ""
+          echo "To run Docker as a non-root user:"
+          echo "  sudo groupadd docker"
+          echo "  sudo usermod -aG docker \$USER"
+          echo "  newgrp docker"
+          echo ""
+          echo "📚 For more information, visit:"
+          echo "  https://docs.docker.com/engine/install/linux-postinstall/"
+        else
+          echo "✅ User is in docker group"
+        fi
+
+        echo "✅ Docker $(docker --version) is installed"
+        echo "✅ Docker Compose $(docker compose version --short) is installed"
+  
+  ###########################################
+  #         Bootstrap                       #
+  ###########################################
+  bootstrap-dev:
+    desc: Bootstrap the application and deploy to development environment
+    cmds:
+      - task: docker:dev:up
+      - cmd: echo "Waiting for 10 seconds for services to start..." && sleep 10
+      - task: bootstrap-configs
+      - task: import-bootstrap-sessions
+      - task: print-admin-credentials
+
+  bootstrap:
+    desc: Bootstrap the application and deploy to production
+    cmds:
+      - task: docker:up
+      - cmd: echo "Waiting for 10 seconds for services to start..." && sleep 10
+      - task: bootstrap-configs
+      - task: import-bootstrap-sessions
+      - task: print-admin-credentials
+
+  print-admin-credentials:
+    desc: Print admin credentials
+    internal: true
+    cmds:
+      - |
+        echo "🔑 Admin credentials:"
+        echo "  Email: {{.DJANGO_SUPERUSER_EMAIL}}"
+        echo "  Password: {{.DJANGO_SUPERUSER_PASSWORD}}"
+
+  import-bootstrap-sessions:
+    desc: Import Test Sessions
+    deps: [auth:get-token]
+    cmds:
+      - |
+        if [ ! -f "bootstrap/import.txt" ]; then
+          echo "❌ Import file not found: bootstrap/import.txt"
+          exit 0
+        fi
+
+        echo "📝 Import test sessions from bootstrap/import.txt? [y/N]"
+        read -p "Continue? [y/N] " answer
+        if [[ ! $answer =~ ^[Yy]$ ]]; then
+          echo "⏭️ Import skipped"
+          exit 0
+        fi
+
+        echo "📝 Starting test sessions import..."
+        # Make sure file ends with newline and read each URL
+        sed -e '$a\' "bootstrap/import.txt" | while read -r url; do
+          # Skip empty lines
+          [ -z "$url" ] && continue
+
+          echo "🔄 Starting import: $url"
+          curl -s "http://localhost/{{.URL_PREFIX}}api/v2/importruns/source/?url=$url" \
+            -H 'Content-Type: application/json' \
+            -b cookies.txt >/dev/null
+
+          sleep 1
+          echo "✅ Import started"
+        done
+
+        echo "✅ All imports have been queued!"
+      - defer: { task: auth:get-token:clean }
+
+  bootstrap-configs:
+    desc: Bootstrap Configs
+    internal: true
+    deps: [auth:get-token]
+    cmds:
+      - |
+        TOKEN=$(cat .access_token)
+        if [ -z "$TOKEN" ]; then
+          echo "❌ Failed to get access token"
+          exit 1
+        fi
+        echo "📝 Using login {{.DJANGO_SUPERUSER_EMAIL}} and password {{.DJANGO_SUPERUSER_PASSWORD}}"
+
+        echo "📝 Do you want to bootstrap configs? [y/N]"
+        read -p "Continue? [y/N] " answer
+        if [[ ! $answer =~ ^[Yy]$ ]]; then
+          echo "⏭️ Configs bootstrap skipped"
+          exit 0
+        fi
+
+        config_exists() {
+          local name=$1
+          local type=$2
+          local response
+
+          response=$(curl -s "http://localhost/{{.URL_PREFIX}}api/v2/config/" -b cookies.txt)
+
+          if command -v jq >/dev/null 2>&1; then
+            echo "$response" | jq -e ".[] | select(.name == \"$name\" and .type == \"$type\")" >/dev/null
+          else
+            # Fallback if jq is not available
+            echo "$response" | grep -q "\"name\": \"$name\", \"type\": \"$type\""
+          fi
+          return $?
+        }
+
+        create_config() {
+          local type=$1
+          local name=$2
+          local file=$3
+
+          if config_exists "$name" "$type"; then
+            echo "⏭️  Config '$name' ($type) already exists, skipping..."
+            return 0
+          fi
+
+          echo "📝 Creating $type config '$name' from $file..."
+          content=$(cat "$file")
+
+          response=$(curl -s "http://localhost/{{.URL_PREFIX}}api/v2/config/" \
+            -H 'Content-Type: application/json' \
+            -b cookies.txt \
+            --data-raw "{
+              \"type\": \"$type\",
+              \"name\": \"$name\",
+              \"description\": \"$name Configuration\",
+              \"is_active\": true,
+              \"content\": $content
+            }")
+
+          if echo "$response" | grep -q "id"; then
+            echo "✅ Successfully created $name config"
+          else
+            echo "❌ Failed to create $name config"
+            echo "Response: $response"
+            exit 1
+          fi
+        }
+
+        create_config "report" "report" "bootstrap/report.json"
+        create_config "global" "meta" "bootstrap/meta.json"
+        create_config "global" "tags" "bootstrap/tags.json"
+        create_config "global" "references" "bootstrap/references.json"
+        create_config "global" "per_conf" "bootstrap/per_conf.json"
+
+        echo "✅ All configs processed successfully!"
+      - defer: { task: auth:get-token:clean }
+
+  auth:get-token:
+    desc: Get access token by logging in
+    internal: true
+    vars:
+      EMAIL: '{{.DJANGO_SUPERUSER_EMAIL | default "admin@bublik.com"}}'
+      PASSWORD: '{{.DJANGO_SUPERUSER_PASSWORD | default "admin"}}'
+    cmds:
+      - |
+        echo "🔑 Logging in with {{.EMAIL}}..."
+        response=$(curl -s -c cookies.txt "http://localhost/{{.URL_PREFIX}}auth/login/" \
+          -H 'Content-Type: application/json' \
+          --data-raw "{\"email\":\"{{.EMAIL}}\",\"password\":\"{{.PASSWORD}}\"}")
+
+        if grep -q "access_token" cookies.txt; then
+          echo "✅ Successfully logged in"
+          token=$(grep "access_token" cookies.txt | cut -f7)
+          echo "$token" > .access_token
+          echo "✅ Token saved to .access_token"
+        else
+          echo "❌ Login failed"
+          echo "$response"
+          exit 1
+        fi
+
+  auth:get-token:clean:
+    desc: Clean up access token
+    internal: true
+    cmds:
+      - rm -f cookies.txt .access_token
