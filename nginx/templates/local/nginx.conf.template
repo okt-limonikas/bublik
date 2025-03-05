@@ -1,0 +1,78 @@
+upstream django {
+    server django:8000;
+}
+
+upstream flower {
+    server flower:5555;
+}
+
+upstream bublik-ui {
+    server bublik-ui:4200;
+}
+
+upstream te-log-server {
+    server te-log-server:80;
+}
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 80;
+    large_client_header_buffers 16 5120k;
+
+    location ${URL_PREFIX}/ {
+        proxy_pass http://django;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+    location ${URL_PREFIX}/flower/ {
+        proxy_pass http://flower;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    location ${URL_PREFIX}/v2/ {
+        proxy_pass http://bublik-ui;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400;
+    }
+
+    location ${URL_PREFIX}/logs/ {
+        rewrite ^${URL_PREFIX}(/logs/.*)$ $1 break;
+        proxy_pass http://te-log-server;
+
+        proxy_redirect ~^/(logs/.*)$ ${URL_PREFIX}/$1;
+
+        sub_filter 'href="/' 'href="${URL_PREFIX}/';
+        sub_filter 'src="/icons/' 'src="${URL_PREFIX}/icons/';
+        sub_filter 'src="/' 'src="${URL_PREFIX}/';
+        sub_filter_once off;
+        sub_filter_types text/html;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400;
+    }
+
+    location /icons/ {
+        proxy_pass http://te-log-server;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400;
+    }
+
+    location ${URL_PREFIX}/static/ {
+        alias /app/bublik/bublik/representation/static/;
+    }
+}
