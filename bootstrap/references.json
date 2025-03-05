@@ -1,0 +1,18 @@
+{
+  "REVISIONS": {
+    "TE_REV": {
+      "uri": "https://github.com/ts-factory/test-environment",
+      "name": "Test Environment"
+    }
+  },
+  "LOGS_BASES": [
+    {
+      "uri": ["https://ts-factory.io/logs/"],
+      "name": "Test Logs Base"
+    },
+    {
+      "uri": ["http://te-log-server/logs/"],
+      "name": "Local Logs Base"
+    }
+  ]
+}

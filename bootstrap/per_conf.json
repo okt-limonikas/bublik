@@ -1,0 +1,58 @@
+{
+  "PROJECT": "ts-factory",
+  "RUN_KEY_METAS": ["START_TIMESTAMP", "CFG"],
+  "DASHBOARD_DATE": "CAMPAIGN_DATE",
+  "RUN_STATUS_META": "RUN_STATUS",
+  "DASHBOARD_HEADER": [
+    {
+      "key": "iut",
+      "label": "IUT"
+    },
+    {
+      "key": "notes",
+      "label": "Notes"
+    },
+    {
+      "key": "total",
+      "label": "Total"
+    },
+    {
+      "key": "status",
+      "label": "Status"
+    },
+    {
+      "key": "ts_name",
+      "label": "Test Suite"
+    },
+    {
+      "key": "variant",
+      "label": "Variant"
+    },
+    {
+      "key": "progress",
+      "label": "Executed"
+    },
+    {
+      "key": "unexpected",
+      "label": "NOK"
+    },
+    {
+      "key": "configuration",
+      "label": "Configuration"
+    }
+  ],
+  "DASHBOARD_PAYLOAD": {
+    "notes": "go_bug",
+    "total": "go_tree",
+    "unexpected": "go_run_failed",
+    "configuration": "go_run"
+  },
+  "METADATA_ON_PAGES": ["Test Suite", "Configuration"],
+  "RUN_COMPLETE_FILE": ".done",
+  "SPECIAL_CATEGORIES": ["Configuration"],
+  "DASHBOARD_RUNS_SORT": ["start"],
+  "CSRF_TRUSTED_ORIGINS": [],
+  "DASHBOARD_DEFAULT_MODE": "two_days_two_columns",
+  "EMAIL_PROJECT_WATCHERS": [],
+  "RUN_STATUS_BY_NOK_BORDERS": [20, 80]
+}
