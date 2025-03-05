@@ -35,3 +35,13 @@ cache/
 # Coverage results
 .coverage
 htmlcov/
+
+# Env
+.env
+.envrc.private
+
+# Default logs folder
+te-logs
+
+# Static files
+bublik/representation/static
