@@ -1,0 +1,47 @@
+[
+  {
+    "type": "tag",
+    "category": "nics",
+    "set-comment": "NIC type",
+    "set-priority": 2
+  },
+  {
+    "type": "tag",
+    "category": "datapaths",
+    "set-comment": "Tested datapath if applicable",
+    "set-priority": 3
+  },
+  {
+    "type": "tag",
+    "category": "fw-variants",
+    "set-comment": "FW variant information",
+    "set-priority": 4
+  },
+  {
+    "type": "tag",
+    "category": "drivers",
+    "set-comment": "Kernel driver",
+    "set-priority": 1
+  },
+  {
+    "type": "tag",
+    "category": "irrelevant_tag",
+    "set-priority": 10
+  },
+  {
+    "name": "pci-.+",
+    "set-category": "nics"
+  },
+  {
+    "name": "tx-datapath-.+|rx-datapath-.+",
+    "set-category": "datapaths"
+  },
+  {
+    "name": "tx-.+|rx-.+",
+    "set-category": "fw-variants"
+  },
+  {
+    "name": "vfio-pci|igb_uio|uio_pci_generic|virtio-pci|igb|sfc|sfc_ef100|xlnx_efct",
+    "set-category": "drivers"
+  }
+]

@@ -1,0 +1,62 @@
+{
+  "tests": {
+    "testpmd_rxonly": {
+      "axis_x": {
+        "arg": "packet_size",
+        "label": "Packet Size"
+      },
+      "axis_y": [
+        {
+          "keys": {
+            "Side": ["Rx"]
+          },
+          "type": ["throughput"]
+        },
+        {
+          "aggr": ["mean"],
+          "keys": {
+            "Side": ["Rx"]
+          },
+          "type": ["pps"]
+        }
+      ],
+      "chart_view": true,
+      "table_view": true,
+      "not_show_args": {},
+      "records_order": [],
+      "sequence_group_arg": "testpmd_arg_rxq",
+      "percentage_base_value": 1,
+      "sequence_name_conversion": {}
+    },
+    "testpmd_txonly": {
+      "axis_x": {
+        "arg": "testpmd_command_txpkts",
+        "label": "TTX"
+      },
+      "axis_y": [
+        {
+          "keys": {
+            "Side": ["Tx"]
+          },
+          "type": ["throughput"]
+        },
+        {
+          "aggr": ["mean"],
+          "keys": {
+            "Side": ["Tx"]
+          },
+          "type": ["pps"]
+        }
+      ],
+      "chart_view": true,
+      "table_view": true,
+      "not_show_args": {},
+      "records_order": [],
+      "sequence_group_arg": "testpmd_arg_txq",
+      "percentage_base_value": 1,
+      "sequence_name_conversion": {}
+    }
+  },
+  "title_content": ["CAMPAIGN_DATE", "CFG"],
+  "test_names_order": ["testpmd_txonly", "testpmd_rxonly"]
+}
