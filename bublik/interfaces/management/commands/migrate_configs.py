@@ -83,6 +83,7 @@ class Command(BaseCommand):
                     {
                         'type': ConfigTypes.GLOBAL,
                         'name': config_name,
+                        'project': None,
                         'description': config_description,
                         'content': config_content,
                     },
