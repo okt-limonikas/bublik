@@ -11,6 +11,7 @@ from bublik.core.config.reformatting.steps import (
     UpdateCSRFTrustedOrigins,
     UpdateDashboardHeaderStructure,
     UpdateLogsFormat,
+    UpdateProject,
     UpdateSeqSettingsStructure,
 )
 
@@ -43,6 +44,7 @@ class ReportConfigReformatPipeline(ReformatPipeline):
         super().__init__()
         self.add_step(UpdateAxisXStructure())
         self.add_step(UpdateSeqSettingsStructure())
+        self.add_step(UpdateProject())
 
 
 class PerConfConfigReformatPipeline(ReformatPipeline):
@@ -50,15 +52,18 @@ class PerConfConfigReformatPipeline(ReformatPipeline):
         super().__init__()
         self.add_step(UpdateDashboardHeaderStructure())
         self.add_step(UpdateCSRFTrustedOrigins())
+        self.add_step(UpdateProject())
 
 
 class ReferencesConfigReformatPipeline(ReformatPipeline):
     def __init__(self):
         super().__init__()
         self.add_step(UpdateLogsFormat())
+        self.add_step(UpdateProject())
 
 
 class MetaConfigReformatPipeline(ReformatPipeline):
     def __init__(self):
         super().__init__()
         self.add_step(SimplifyMetaStructure())
+        self.add_step(UpdateProject())
