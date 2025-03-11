@@ -5,6 +5,7 @@ import logging
 
 from bublik.core.config.reformatting.steps import (
     BaseReformatStep,
+    RemoveProjectFromPerConf,
     RemoveUnsupportedAttributes,
     SimplifyMetaStructure,
     UpdateAxisXStructure,
@@ -53,6 +54,7 @@ class PerConfConfigReformatPipeline(ReformatPipeline):
         self.add_step(UpdateDashboardHeaderStructure())
         self.add_step(UpdateCSRFTrustedOrigins())
         self.add_step(UpdateProject())
+        self.add_step(RemoveProjectFromPerConf())
 
 
 class ReferencesConfigReformatPipeline(ReformatPipeline):
