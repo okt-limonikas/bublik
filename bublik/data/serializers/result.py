@@ -24,12 +24,12 @@ from bublik.data.serializers.reference import ReferenceSerializer
 
 
 __all__ = [
-    'TestSerializer',
+    'MetaResultSerializer',
     'TestArgumentSerializer',
-    'TestIterationSerializer',
     'TestIterationRelationSerializer',
     'TestIterationResultSerializer',
-    'MetaResultSerializer',
+    'TestIterationSerializer',
+    'TestSerializer',
 ]
 
 
