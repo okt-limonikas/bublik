@@ -80,7 +80,6 @@ class MetaCategory(models.Model):
 
     name = models.CharField(
         max_length=64,
-        unique=True,
         null=False,
         blank=False,
         help_text='Name of the category.',
@@ -102,12 +101,20 @@ class MetaCategory(models.Model):
 The meta type, enumeration: result, verdict, note, error, tag, label, \
 revision, branch, repo, log, import, count, objective.''',
     )
+    project = models.ForeignKey(
+        Meta,
+        null=True,
+        on_delete=models.CASCADE,
+        limit_choices_to={'name': 'PROJECT', 'type': 'label'},
+        related_name='project_metacategories',
+    )
 
     class Admin:
         pass
 
     class Meta:
         db_table = 'bublik_metacategory'
+        unique_together = ('name', 'project')
 
     def __repr__(self):
         return (
