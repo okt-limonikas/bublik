@@ -17,7 +17,7 @@ from bublik.data.models import Meta, MetaCategory, MetaPattern
 logger = logging.getLogger('bublik.server')
 
 
-def categorize_metas(meta_data: MetaData) -> None:
+def categorize_metas(meta_data: MetaData, project_id) -> None:
     '''
     Checks if all of the received Meta objects have already been categorized -
     which means if each Meta object has been added in MetaCategory.metas.
@@ -27,12 +27,17 @@ def categorize_metas(meta_data: MetaData) -> None:
 
     logger.info('Checking what metas are categorized already.')
 
-    if not MetaCategory.objects.exists() or not MetaPattern.objects.exists():
+    if (
+        not MetaCategory.objects.filter(project_id=project_id).exists()
+        or not MetaPattern.objects.filter(category__project_id=project_id).exists()
+    ):
         logger.info(
             'Calling meta_categorization command because there are no '
-            'MetaCategory objects or MetaPattern objects.',
+            'MetaCategory objects or MetaPattern objects '
+            f'for the {Meta.projects.get(id=project_id).value} project.',
         )
-        call_command('meta_categorization')
+        project = Meta.projects.get(id=project_id).value
+        call_command('meta_categorization', '-prj', project)
         return
 
     metapatterns = MetaPattern.objects.all()
