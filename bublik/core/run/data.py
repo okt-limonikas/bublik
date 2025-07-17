@@ -14,6 +14,8 @@ from bublik.core.meta.categorization import (
 from bublik.core.utils import key_value_list_transforming
 from bublik.data.models import GlobalConfigs, Meta, MetaResult, TestArgument
 
+import logging
+logger = logging.getLogger('')
 
 def get_metadata_by_runs(runs, categorize=False):
     """
@@ -53,6 +55,8 @@ def get_tags_by_runs(runs, not_categorize=False):
     Prepare tags as following: {'run_id': ['tag_id', ], }.
     Runs items can represent TestIterationResult objects or just IDs.
     """
+
+    logger.info(f'get_tags_by_runs')
 
     if not_categorize:
         all_tags = caches['run'].get('tags', [])

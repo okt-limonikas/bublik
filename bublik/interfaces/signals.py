@@ -36,7 +36,8 @@ def categorize_metas_on_config_change(sender, instance, **kwargs):
         and instance.name == GlobalConfigs.META.name
         and instance.is_active
     ):
-        call_command('meta_categorization')
+        project = instance.project.value if instance.project else None
+        call_command('meta_categorization', project=project)
 
 
 @contextmanager
