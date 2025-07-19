@@ -16,7 +16,11 @@ def define_run_status(run):
 
     category_names = ['DL', 'DU', 'Status', 'Notes']
     run_meta_results = run.meta_results.select_related('meta')
-    metas_by_category = get_metas_by_category(run_meta_results, category_names)
+    metas_by_category = get_metas_by_category(
+        run_meta_results,
+        category_names,
+        run.meta_results.get(meta__in=models.Meta.projects).meta,
+    )
 
     meta_values_by_category = {}
     for category, metas in metas_by_category.items():

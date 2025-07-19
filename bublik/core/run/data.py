@@ -23,31 +23,43 @@ def get_metadata_by_runs(runs, categorize=False):
     Runs items can represent TestIterationResult objects or just IDs.
     """
 
-    metadata_results = MetaResult.objects.filter(result__in=runs).values_list(
-        'result__id',
-        'meta__id',
-    )
+    metadata_by_runs = {}
 
-    projects = Meta.projects.filter(metaresult__result__in=runs).distinct()
-    project_id = projects.first().id if projects.count() == 1 else None
+    for project in Meta.projects:
 
-    metadata_categories = ConfigServices.getattr_from_global(
-        GlobalConfigs.PER_CONF.name,
-        'METADATA_ON_PAGES',
-        project_id,
-        default=[],
-    )
+        project_results = list(
+            MetaResult.objects.filter(result__in=runs, meta=project).values_list(
+                'result',
+                flat=True,
+            ),
+        )
 
-    groupping_kwargs = {
-        'meta_results': metadata_results,
-        'categories': metadata_categories,
-        'groupby_fn': group_by_runs,
-        'format_fn': key_value_list_transforming,
-    }
+        metadata_results = MetaResult.objects.filter(result__in=project_results).values_list(
+            'result__id',
+            'meta__id',
+        )
 
-    if categorize:
-        groupping_kwargs.update({'groupby_fn': group_by_runs_and_category})
-    return get_metas_by_category(**groupping_kwargs)
+        metadata_categories = ConfigServices.getattr_from_global(
+            GlobalConfigs.PER_CONF.name,
+            'METADATA_ON_PAGES',
+            project.id,
+            default=[],
+        )
+
+        groupping_kwargs = {
+            'meta_results': metadata_results,
+            'categories': metadata_categories,
+            'project': project,
+            'groupby_fn': group_by_runs,
+            'format_fn': key_value_list_transforming,
+        }
+
+        if categorize:
+            groupping_kwargs.update({'groupby_fn': group_by_runs_and_category})
+
+        metadata_by_runs.update(get_metas_by_category(**groupping_kwargs))
+
+    return metadata_by_runs
 
 
 def get_tags_by_runs(runs, not_categorize=False):

@@ -658,7 +658,7 @@ def generate_all_run_details(run):
     branches = q.metas_query('branch')
     revisions = build_revision_references(q.metas_query('revision'), project.id)
     labels = q.labels_query(excluding_category_names=category_names)
-    categories = get_metas_by_category(run_meta_results, category_names)
+    categories = get_metas_by_category(run_meta_results, category_names, project)
     for category, category_values in categories.items():
         categories[category] = key_value_list_transforming(category_values)
 
