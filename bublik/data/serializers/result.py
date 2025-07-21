@@ -113,7 +113,7 @@ class MetaTestSerializer(ModelSerializer):
 
     class Meta:
         model = MetaTest
-        fields = ('id', 'updated', 'meta', 'test', 'serial')
+        fields = ('id', 'updated', 'meta', 'test', 'project', 'serial')
 
     def update_data(self):
         '''
@@ -121,7 +121,10 @@ class MetaTestSerializer(ModelSerializer):
         '''
         if 'serial' not in self.initial_data:
             latest_serial = (
-                MetaTest.objects.filter(test=self.initial_data['test'])
+                MetaTest.objects.filter(
+                    test=self.initial_data['test'],
+                    project=self.initial_data['project'],
+                )
                 .order_by('serial')
                 .values_list('serial', flat=True)
                 .last()
@@ -134,6 +137,12 @@ class MetaTestSerializer(ModelSerializer):
             raise serializers.ValidationError(msg)
         return meta
 
+    def validate_project(self, project):
+        if project is None:
+            msg = 'Project-less comments are not supported'
+            raise serializers.ValidationError(msg)
+        return project
+
     def get_or_create(self, validated_data):
         meta_data = self.validated_data.pop('meta')
         meta_serializer = serialize(MetaSerializer, meta_data)
@@ -141,9 +150,11 @@ class MetaTestSerializer(ModelSerializer):
         if created:
             categorize_meta(meta)
 
+        project = self.validated_data.pop('project')
         serial = self.validated_data.pop('serial')
         return MetaTest.objects.get_or_create(
             **self.validated_data,
             meta=meta,
+            project=project,
             defaults={'serial': serial},
         )
