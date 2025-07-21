@@ -556,7 +556,10 @@ class MetaTest(models.Model):
     The table connects a test with metadata.
     '''
 
-    updated = models.DateTimeField(help_text='Timestamp of the connection creation.')
+    updated = models.DateTimeField(
+        auto_now_add=True,
+        help_text='Timestamp of the connection creation.',
+    )
     meta = models.ForeignKey(
         Meta,
         on_delete=models.CASCADE,
@@ -577,6 +580,7 @@ class MetaTest(models.Model):
 
     class Meta:
         db_table = 'bublik_metatest'
+        unique_together = ('test', 'meta')
 
     def delete(self, *args, **kwargs):
         meta_id = self.meta_id
