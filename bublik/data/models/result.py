@@ -13,6 +13,7 @@ from bublik.core.utils import get_difference
 from bublik.data.managers import TestIterationResultManager
 from bublik.data.models import GlobalConfigs
 from bublik.data.models.meta import Meta
+from bublik.data.models.project import Project
 from bublik.data.models.reference import Reference
 
 
@@ -441,6 +442,13 @@ Timestamp of the iteration (or test run) execution start.''',
 Timestamp of the iteration (or test run) execution end.''',
     )
 
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        null=True,
+        help_text='The project identifier.',
+    )
+
     objects = TestIterationResultManager()
 
     class Admin:
@@ -453,7 +461,7 @@ Timestamp of the iteration (or test run) execution end.''',
         return (
             f'TestIterationResult(id={self.id!r}, iteration={self.iteration!r}, '
             f'test_run={self.test_run!r}, tin={self.tin!r}, exec_seqno={self.exec_seqno!r}, '
-            f'start={self.start!r}, finish={self.finish!r})'
+            f'start={self.start!r}, finish={self.finish!r}), project={self.project!r})'
         )
 
     @cached_property
@@ -574,13 +582,19 @@ class MetaTest(models.Model):
         on_delete=models.CASCADE,
         help_text='The test identifier.',
     )
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        null=True,
+        help_text='The project identifier.',
+    )
 
     class Admin:
         pass
 
     class Meta:
         db_table = 'bublik_metatest'
-        unique_together = ('test', 'meta')
+        unique_together = ('test', 'meta', 'project')
 
     def delete(self, *args, **kwargs):
         meta_id = self.meta_id
@@ -590,4 +604,7 @@ class MetaTest(models.Model):
             Meta.objects.get(id=meta_id).delete()
 
     def __repr__(self):
-        return f'MetaTest(test={self.test!r}, serial={self.serial!r}, meta={self.meta!r})'
+        return (
+            f'MetaTest(test={self.test!r}, serial={self.serial!r}, '
+            f'meta={self.meta!r}, project={self.project!r})'
+        )
