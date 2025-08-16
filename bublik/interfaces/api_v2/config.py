@@ -15,6 +15,7 @@ from bublik.core.auth import auth_required, get_user_by_access_token
 from bublik.core.config.filters import ConfigFilter
 from bublik.core.config.services import ConfigServices
 from bublik.core.filter_backends import ProjectFilterBackend
+from bublik.core.shortcuts import serialize
 from bublik.data.models import Config, ConfigTypes, GlobalConfigs, Project, UserRoles
 from bublik.data.serializers import ConfigSerializer
 
@@ -81,15 +82,13 @@ class ConfigViewSet(ModelViewSet):
         Return a created object or an existing object with the passed content.
         Request: POST api/v2/config.
         '''
-        data = {
-            k: v
-            for k, v in request.data.items()
-            if k in ['type', 'name', 'project', 'is_active', 'description', 'content']
-        }
-        config, created = self.serializer_class.validate_and_get_or_create(
-            config_data=data,
-            access_token=request.COOKIES.get('access_token'),
+        access_token = request.COOKIES.get('access_token')
+        serializer = serialize(
+            self.serializer_class,
+            data=request.data,
+            context={'access_token': access_token},
         )
+        config, created = serializer.get_or_create()
         config_data = self.get_serializer(config).data
         if not created:
             return Response(config_data, status=status.HTTP_400_BAD_REQUEST)
@@ -106,13 +105,11 @@ class ConfigViewSet(ModelViewSet):
         # prepare data for updating/creating a new version
         config_data = self.get_serializer(config).data
         updated_data = {
+            **config_data,
+            **request.data,
             'type': config_data['type'],
             'project': config_data['project'],
         }
-        for attr in ['name', 'description', 'is_active', 'content', 'project']:
-            updated_data[attr] = (
-                request.data[attr] if attr in request.data else config_data[attr]
-            )
 
         if 'name' in request.data:
             # check the passed name for uniqueness
@@ -161,17 +158,24 @@ class ConfigViewSet(ModelViewSet):
 
         if 'content' in request.data:
             # create new object version
-            new_config, created = self.serializer_class.validate_and_get_or_create(
-                config_data=updated_data,
-                access_token=request.COOKIES.get('access_token'),
+            access_token = request.COOKIES.get('access_token')
+            serializer = serialize(
+                self.serializer_class,
+                data=updated_data,
+                context={'access_token': access_token},
             )
+            new_config, created = serializer.get_or_create()
             new_config_data = self.get_serializer(new_config).data
             if not created:
                 return Response(new_config_data, status=status.HTTP_400_BAD_REQUEST)
             return Response(new_config_data, status=status.HTTP_201_CREATED)
 
-        serializer = self.get_serializer(config, data=updated_data, partial=True)
-        serializer.is_valid(raise_exception=True)
+        serializer = serialize(
+            self.serializer_class,
+            instance=config,
+            data=updated_data,
+            partial=True,
+        )
         self.perform_update(serializer)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
