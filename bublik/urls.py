@@ -42,6 +42,7 @@ api_v2_router.register(
     basename='tests_comments',
 )
 api_v2_router.register(r'config', api_v2.ConfigViewSet, 'config')
+api_v2_router.register(r'chat', api_v2.ChatViewSet, 'chat')
 
 ### URL patterns mounting ###
 urlpatterns = [
@@ -72,6 +73,7 @@ urlpatterns = [
         name='swagger-ui',
     ),
     path('api/v2/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/v2/chat/stream/', api_v2.chat_stream_view, name='chat_stream'),
     path('api/v2/', include((api_v2_router.urls, 'api-v2'), namespace='api-v2')),
     # Redirects
     path('', main_api.redirect_root),

@@ -12,6 +12,7 @@ from .auth import (
     RefreshTokenView,
     RegisterView,
 )
+from .chat import ChatViewSet, chat_stream_view
 from .comments import TestCommentViewSet
 from .config import ConfigViewSet
 from .dashboard import (
@@ -38,6 +39,7 @@ from .url_shortener import URLShortenerView
 __all__ = [
     'ActivateView',
     'AdminViewSet',
+    'ChatViewSet',
     'ConfigViewSet',
     'DashboardFormatting',
     'DashboardPayload',
@@ -63,6 +65,7 @@ __all__ = [
     'TestCommentViewSet',
     'TreeViewSet',
     'URLShortenerView',
+    'chat_stream_view',
     'clear_all_runs_stats_cache',
     'local_logs',
     'meta_categorization',

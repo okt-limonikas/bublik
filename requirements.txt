@@ -52,6 +52,8 @@ importlib-metadata==4.13.0
 isort==5.8.0
 jsonschema==4.17.3
 kombu==5.3.3
+langchain==0.3.27
+langchain-openai==0.3.30
 logilab-astng==0.24.3
 logilab-common==1.4.2
 Markdown==3.0.1
@@ -59,6 +61,7 @@ mccabe==0.6.1
 more-itertools==8.1.0
 networkx
 ninja==1.10.2.3
+openai==1.99.9
 ordered-set
 packaging==24.1
 pendulum==3.0.0
