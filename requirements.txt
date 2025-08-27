@@ -28,7 +28,6 @@ django-debug-toolbar==5.0.1
 django-excel-response2==2.0.8
 django-extensions==3.1.5
 django-filter==25.1
-django-lint==2.0.4
 django-redis-cache==3.0.1
 django-six==1.0.4
 django-static-jquery==2.1.4
@@ -52,8 +51,6 @@ importlib-metadata==4.13.0
 isort==5.8.0
 jsonschema==4.17.3
 kombu==5.3.3
-logilab-astng==0.24.3
-logilab-common==1.4.2
 Markdown==3.0.1
 mccabe==0.6.1
 more-itertools==8.1.0
@@ -75,7 +72,6 @@ pydot==2.0.0
 pyeda==0.28.0
 pyflakes==2.3.1
 pykerberos==1.2.4
-pylint==0.28.0
 pyparsing==3.1.2
 python-dateutil==2.8.2
 python-json-logger==2.0.7
