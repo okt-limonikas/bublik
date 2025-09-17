@@ -174,6 +174,18 @@ class Config(models.Model):
             ('project', 'content'),
         )
 
+    def __repr__(self):
+        return (
+            f'Config(created={self.created!r}, project={self.project!r}, type={self.type!r}, '
+            f'name={self.name!r}, version={self.version!r}, is_active={self.is_active!r}, '
+            f'description={self.description!r}, user={self.user!r})'
+        )
+
+    def save(self, *args, **kwargs):
+        if self.version is None:
+            self.version = self._calc_version()
+        super().save(*args, **kwargs)
+
     def activate(self):
         active = Config.objects.get_active_or_none(self.type, self.name, self.project)
         if active:
@@ -182,20 +194,8 @@ class Config(models.Model):
         self.is_active = True
         self.save()
 
-    def save(self, *args, **kwargs):
-        if self.version is None:
-            self.version = self._calc_version()
-        super().save(*args, **kwargs)
-
     def _calc_version(self):
         config = Config.objects.get_latest(self.type, self.name, self.project)
         if config:
             return config.version + 1
         return 0
-
-    def __repr__(self):
-        return (
-            f'Config(created={self.created!r}, project={self.project!r}, type={self.type!r}, '
-            f'name={self.name!r}, version={self.version!r}, is_active={self.is_active!r}, '
-            f'description={self.description!r}, user={self.user!r})'
-        )
