@@ -4,6 +4,7 @@
 from django.conf import settings
 from django.core.cache import caches
 from django.core.exceptions import ObjectDoesNotExist
+import json5
 
 from bublik.core.config.services import ConfigServices
 from bublik.core.utils import convert_to_int_if_digit
@@ -11,8 +12,9 @@ from bublik.data.models import Config, ConfigTypes, GlobalConfigs
 
 
 def get_config_from_cache(project_id, default=None):
-    config_content = caches['config'].get('content')
+    config_content: str = caches['config'].get('content')
     config_project = caches['config'].get('project')
+
     if config_project != convert_to_int_if_digit(project_id) or config_content is None:
         try:
             config = Config.objects.get_global(GlobalConfigs.PER_CONF.name, project_id)
@@ -24,7 +26,13 @@ def get_config_from_cache(project_id, default=None):
             )
         except ObjectDoesNotExist:
             config_content = default
-    return config_content
+
+    try:
+        parsed_content = json5.loads(config_content)
+    except Exception:
+        parsed_content = None
+
+    return parsed_content
 
 
 def get_schema_from_cache():

@@ -163,7 +163,7 @@ class Config(models.Model):
         related_name='config',
         help_text='The user who created the configuration object.',
     )
-    content = models.JSONField(help_text='Configuration data.')
+    content = models.TextField(help_text='Configuration data in JSON5 format.')
 
     objects = ConfigManager()
 

@@ -4,6 +4,7 @@
 import contextlib
 
 from django.core.exceptions import ObjectDoesNotExist
+import json5
 
 from bublik.data.models import Config, ConfigTypes, GlobalConfigs
 from bublik.data.schemas.services import load_schema
@@ -27,10 +28,12 @@ class ConfigServices:
 
     @staticmethod
     def getattr_from_global(config_name, data_key, project_id, **kwargs):
-        with contextlib.suppress(ObjectDoesNotExist, KeyError):
-            return Config.objects.get_global(config_name, project_id).content[data_key]
-        with contextlib.suppress(ObjectDoesNotExist, KeyError):
-            return Config.objects.get_global(config_name, None).content[data_key]
+        with contextlib.suppress(ObjectDoesNotExist, KeyError, ValueError):
+            config_content_raw = Config.objects.get_global(config_name, project_id).content
+            return json5.loads(config_content_raw)[data_key]
+        with contextlib.suppress(ObjectDoesNotExist, KeyError, ValueError):
+            config_content_raw = Config.objects.get_global(config_name, None).content
+            return json5.loads(config_content_raw)[data_key]
         if 'default' in kwargs:
             return kwargs['default']
         return None

@@ -6,6 +6,7 @@ import json
 from typing import ClassVar
 
 from django.contrib.auth import get_user_model
+import json5
 import jsonschema
 from jsonschema import validate
 from rest_framework import serializers
@@ -70,11 +71,15 @@ class ConfigSerializer(ModelSerializer):
     def ensure_json(self, config_content):
         if isinstance(config_content, (dict, list)):
             return config_content
+
         try:
             return json.loads(config_content)
-        except (json.JSONDecodeError, TypeError) as e:
-            msg = 'Invalid format: JSON is expected'
-            raise serializers.ValidationError(msg) from e
+        except (json.JSONDecodeError, TypeError):
+            try:
+                return json5.loads(config_content)
+            except (Exception, TypeError) as e2:
+                msg = 'Invalid format: JSON or JSON5 is expected'
+                raise serializers.ValidationError(msg) from e2
 
     def validate_type(self, config_type):
         possible_config_types = ConfigTypes.all()
@@ -118,12 +123,15 @@ class ConfigSerializer(ModelSerializer):
         '''
         Do the preprocessing and validate config content using the appropriate JSON schema.
         '''
-        content = self.ensure_json(content)
+        original_content = content
+        # Parsed content for validation purposes only
+        parsed_content = self.ensure_json(content)
+
         data = self.get_data()
         json_schema = ConfigServices.get_schema(data['type'], data['name'])
         if json_schema:
             try:
-                validate(instance=content, schema=json_schema)
+                validate(instance=parsed_content, schema=json_schema)
             except jsonschema.exceptions.ValidationError as jeve:
                 jeve_msg = jeve.message[0].lower() + jeve.message[1:]
                 msg = f'Invalid format: {jeve_msg}'
@@ -144,7 +152,14 @@ class ConfigSerializer(ModelSerializer):
                     f'Invalid input: duplicate \'category\' values found: {category_duplicates}'
                 )
                 raise serializers.ValidationError(msg)
-        return content
+
+        if isinstance(original_content, str):
+            return original_content
+
+        if isinstance(parsed_content, (dict, list)):
+            return json.dumps(parsed_content)
+
+        return original_content
 
     @classmethod
     def initialize(cls, config_data):

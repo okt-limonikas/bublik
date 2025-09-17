@@ -3,6 +3,7 @@
 amqp==5.1.1
 appdirs==1.4.3
 asgiref
+json5==0.12.1
 asn1crypto==0.24.0
 astor==0.8.1
 attrs==21.4.0
