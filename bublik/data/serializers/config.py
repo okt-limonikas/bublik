@@ -133,7 +133,9 @@ class ConfigSerializer(ModelSerializer):
             category_duplicates = [
                 category
                 for category, count in Counter(
-                    item['category'] for item in content if item.get('category') is not None
+                    item['category']
+                    for item in parsed_content
+                    if item.get('category') is not None
                 ).items()
                 if count > 1
             ]
