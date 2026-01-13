@@ -362,9 +362,6 @@ def register_tools(mcp: FastMCP):  # noqa: C901
         '''
         Get dashboard data for today (structured format).
 
-        If no data exists for today, returns the most recent dashboard data available.
-        This matches the behavior of the REST API /api/v2/dashboard/ endpoint.
-
         Args:
             project_id: Optional project ID to filter results
             sort_by: Optional comma-separated column keys to sort by (e.g., 'start,total')
@@ -372,7 +369,6 @@ def register_tools(mcp: FastMCP):  # noqa: C901
         Returns:
             Dictionary with the latest dashboard structure
         '''
-        # Get latest available date (matches REST API behavior)
         date_str = await sync_to_async(DashboardService.get_latest_dashboard_date)(
             project_id=project_id,
         )
