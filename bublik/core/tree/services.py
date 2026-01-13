@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from bublik.core.cache import RunCache
 from bublik.core.exceptions import NotFoundError
 from bublik.core.tree.representation import path_to_node, tree_representation
@@ -30,7 +32,7 @@ class TreeService:
         '''
         try:
             return models.TestIterationResult.objects.get(id=result_id)
-        except models.TestIterationResult.DoesNotExist as e:
+        except ObjectDoesNotExist as e:
             msg = f'Result {result_id} not found'
             raise NotFoundError(msg) from e
 
