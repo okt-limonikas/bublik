@@ -26,8 +26,9 @@ class ServerViewSet(ViewSet):
         return Response(data=data)
 
     @action(detail=False, methods=['get'])
-    def tab_title_prefix(self, request):
+    def tab_title_prefix(self, _request):
         project_id = self.request.query_params.get('project_id')
+
         return Response(
             {
                 'tab_title_prefix': ConfigServices.getattr_from_global(
@@ -35,5 +36,13 @@ class ServerViewSet(ViewSet):
                     'TAB_TITLE_PREFIX',
                     project_id,
                 ),
+            },
+        )
+
+    @action(detail=False, methods=['get'])
+    def features(self, _request):
+        return Response(
+            {
+                'analytics_enabled': settings.ANALYTICS_ENABLED,
             },
         )
