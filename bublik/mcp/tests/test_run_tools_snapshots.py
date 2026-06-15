@@ -581,6 +581,74 @@ def test_run_leaf_tool_forwards_filters(
     assert '| expected |' in output
 
 
+def test_run_leaf_tool_forwards_unexpected_only(
+    monkeypatch: pytest.MonkeyPatch,
+    leaf_results: dict,
+):
+    calls = {}
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'get_result',
+        staticmethod(lambda result_id: SimpleNamespace(test_run_id=49591)),
+    )
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_stats',
+        staticmethod(lambda run_id, requirements: _stats_node()),
+    )
+
+    def list_results_paginated(**kwargs):
+        calls.update(kwargs)
+        return _service_results(leaf_results)
+
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'list_results_paginated',
+        staticmethod(list_results_paginated),
+    )
+    mcp = FakeMCP()
+    register_tools(mcp)
+
+    asyncio.run(
+        mcp.tools['get_run_leaf_results'](
+            51350,
+            page=2,
+            page_size=10,
+            unexpected_only=True,
+        ),
+    )
+
+    assert calls == {
+        'parent_id': 49594,
+        'test_name': 'vlan_filter',
+        'start_exec_seqno': 1759,
+        'requirements': None,
+        'results': None,
+        'result_properties': 'unexpected',
+        'page': 2,
+        'page_size': 10,
+    }
+
+
+@pytest.mark.parametrize(
+    'advanced_filter',
+    [
+        {'requirements': 'REQ-1'},
+        {'results': 'FAILED'},
+        {'result_properties': 'expected'},
+    ],
+)
+def test_run_leaf_tool_rejects_unexpected_only_with_advanced_filters(
+    advanced_filter: dict,
+):
+    with pytest.raises(ValidationError, match='unexpected_only cannot be combined'):
+        _get_run_leaf_results(
+            51350,
+            unexpected_only=True,
+            **advanced_filter,
+        )
+
+
 def test_run_leaf_tool_validates_before_rendering(
     monkeypatch: pytest.MonkeyPatch,
     leaf_results: dict,

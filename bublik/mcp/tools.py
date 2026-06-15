@@ -102,26 +102,31 @@ def register_tools(mcp: FastMCP):  # noqa: C901
         result_properties: str | None = None,
         page: int | None = None,
         page_size: int | None = None,
+        unexpected_only: bool = False,
     ) -> str:
         '''
-        Get concrete executions represented by a run-overview test leaf.
+        Get paginated executions represented by a test leaf in a run overview.
 
-        Use a test Result ID from get_run_overview. Results are paginated and
-        may be filtered by obtained status, expected/unexpected classification,
-        and requirements. With no filters, every concrete execution represented
-        by the aggregate leaf is returned.
+        Pass a test Result ID shown by get_run_overview, not an individual
+        execution ID. For the common failure-investigation workflow, set
+        unexpected_only to true to return only unexpected executions. Otherwise,
+        use the advanced requirements, results, and result_properties filters.
+        unexpected_only is mutually exclusive with all advanced filters. With no
+        toggle or filters, all executions represented by the leaf are returned.
 
         Args:
-            leaf_result_id: Test Result ID shown by get_run_overview
-            requirements: Optional semicolon-separated requirements filter
-            results: Optional semicolon-separated obtained statuses
+            leaf_result_id: Aggregate test Result ID shown by get_run_overview
+            requirements: Optional semicolon-separated requirement names
+            results: Optional semicolon-separated obtained result statuses
             result_properties: Optional semicolon-separated classifications
                 such as expected or unexpected
             page: Page number (default: 1)
             page_size: Items per page (default: 25, max: 10000)
+            unexpected_only: Return only unexpected executions. Cannot be
+                combined with requirements, results, or result_properties
 
         Returns:
-            Markdown table of concrete test executions
+            Markdown table with the matching concrete executions and pagination
         '''
         payload = await sync_to_async(_get_run_leaf_results)(
             leaf_result_id=leaf_result_id,
@@ -130,6 +135,7 @@ def register_tools(mcp: FastMCP):  # noqa: C901
             result_properties=result_properties,
             page=page,
             page_size=page_size,
+            unexpected_only=unexpected_only,
         )
         return render_run_leaf_results(payload)
 

@@ -29,7 +29,15 @@ def _get_run_leaf_results(
     result_properties: str | None = None,
     page: int | None = None,
     page_size: int | None = None,
+    unexpected_only: bool = False,
 ) -> RunLeafResultsPayload:
+    if unexpected_only and any((requirements, results, result_properties)):
+        msg = (
+            'unexpected_only cannot be combined with requirements, results, '
+            'or result_properties'
+        )
+        raise ValidationError(msg)
+
     result = ResultService.get_result(leaf_result_id)
     run_id = result.test_run_id
     if run_id is None:
@@ -63,7 +71,7 @@ def _get_run_leaf_results(
         test_name=leaf.test_name,
         start_exec_seqno=leaf.exec_seqno,
         results=results,
-        result_properties=result_properties,
+        result_properties='unexpected' if unexpected_only else result_properties,
         requirements=requirements,
         page=page,
         page_size=page_size,
