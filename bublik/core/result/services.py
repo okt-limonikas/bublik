@@ -265,3 +265,174 @@ class ResultService:
 
         results_details = generate_results_details(queryset)
         return PaginatedResult.paginate_queryset(results_details, page, page_size)
+
+    @staticmethod
+    def get_run_leaf_results(
+        leaf_result_id: int,
+        requirements: str | None = None,
+        results: str | None = None,
+        result_properties: str | None = None,
+        page: int | None = None,
+        page_size: int | None = None,
+    ) -> dict:
+        '''
+        Return concrete executions represented by an aggregate run-stats leaf.
+
+        A stats leaf points at the first result in a consecutive sequence of
+        same-named test executions under one parent package. This method uses
+        the same grouping rule as run statistics and then applies optional
+        filters to the concrete executions.
+        '''
+        leaf = (
+            models.TestIterationResult.objects.select_related(
+                'iteration__test',
+                'parent_package',
+                'test_run',
+            )
+            .filter(id=leaf_result_id)
+            .first()
+        )
+        if leaf is None:
+            msg = f'Result {leaf_result_id} not found'
+            raise NotFoundError(msg)
+
+        if (
+            leaf.test_run_id is None
+            or leaf.iteration is None
+            or models.ResultType.inv(leaf.iteration.test.result_type)
+            != models.ResultType.TEST
+        ):
+            msg = 'A test leaf result ID from get_run_overview is required'
+            raise ValidationError(msg)
+
+        siblings = list(
+            models.TestIterationResult.objects.filter(
+                test_run_id=leaf.test_run_id,
+                parent_package_id=leaf.parent_package_id,
+            )
+            .select_related('iteration__test')
+            .order_by('start'),
+        )
+        leaf_index = next(
+            (index for index, sibling in enumerate(siblings) if sibling.id == leaf.id),
+            None,
+        )
+        if leaf_index is None:
+            msg = 'The requested result is not part of its run result tree'
+            raise ValidationError(msg)
+
+        test_name = leaf.iteration.test.name
+        group = ResultService._get_run_stats_leaf_group(siblings, leaf_index)
+        group_ids = [result.id for result in group]
+        queryset = models.TestIterationResult.objects.filter(id__in=group_ids)
+        query_delimiter = settings.QUERY_DELIMITER
+        errors = []
+
+        if results:
+            results_list = results.split(query_delimiter)
+            diff = get_difference(results_list, models.ResultStatus.all_statuses())
+            if diff:
+                errors.append(f'Unknown result results: {diff}')
+            queryset = queryset.filter(
+                meta_results__meta__type='result',
+                meta_results__meta__value__in=results_list,
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
+        if result_properties:
+            queryset = queryset.filter_by_result_classification(
+                result_properties.split(query_delimiter),
+            )
+
+        if requirements:
+            for requirement in requirements.split(query_delimiter):
+                requirement_meta = models.Meta.objects.filter(
+                    type='requirement',
+                    value=requirement,
+                ).first()
+                if requirement_meta is None:
+                    queryset = models.TestIterationResult.objects.none()
+                    break
+                queryset = queryset.filter(meta_results__meta=requirement_meta)
+
+        queryset = (
+            queryset.order_by('start', 'id')
+            .select_related('iteration', 'iteration__test', 'project')
+            .prefetch_related(
+                'expectations',
+                'expectations__expectmeta_set',
+                'measurement_results',
+                'meta_results__meta',
+                'iteration__test_arguments',
+            )
+            .distinct()
+        )
+        concrete_results = list(queryset)
+        details_by_id = {
+            detail['result_id']: detail
+            for detail in generate_results_details(concrete_results)
+        }
+        result_rows = []
+        for result in concrete_results:
+            detail = details_by_id[result.id]
+            detail['exec_seqno'] = result.exec_seqno
+            detail['classification'] = (
+                'unexpected' if detail['has_error'] else 'expected'
+            )
+            result_rows.append(detail)
+
+        paginated = PaginatedResult.paginate_queryset(result_rows, page, page_size)
+        return {
+            'leaf': {
+                'result_id': leaf.id,
+                'run_id': leaf.test_run_id,
+                'test_name': test_name,
+                'path': ResultService._get_result_path(leaf),
+            },
+            'requirements': requirements,
+            **paginated,
+        }
+
+    @staticmethod
+    def _get_result_path(result: models.TestIterationResult) -> list[str]:
+        path = [result.iteration.test.name]
+        parent = result.parent_package
+        while parent is not None:
+            path.append(parent.iteration.test.name)
+            parent = parent.parent_package
+        return list(reversed(path))
+
+    @staticmethod
+    def _get_run_stats_leaf_group(results: list, leaf_index: int) -> list:
+        leaf = results[leaf_index]
+        test_name = leaf.iteration.test.name
+        group_start = leaf_index
+        while (
+            group_start > 0
+            and results[group_start - 1].iteration.test.name == test_name
+            and models.ResultType.inv(
+                results[group_start - 1].iteration.test.result_type,
+            )
+            == models.ResultType.TEST
+        ):
+            group_start -= 1
+
+        if group_start != leaf_index:
+            msg = (
+                'Result ID is not an aggregate leaf ID; use the leaf result ID '
+                'shown by get_run_overview'
+            )
+            raise ValidationError(msg)
+
+        group_end = leaf_index + 1
+        while (
+            group_end < len(results)
+            and results[group_end].iteration.test.name == test_name
+            and models.ResultType.inv(results[group_end].iteration.test.result_type)
+            == models.ResultType.TEST
+        ):
+            group_end += 1
+
+        return results[group_start:group_end]

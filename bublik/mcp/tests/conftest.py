@@ -4,15 +4,21 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import re
 from typing import TYPE_CHECKING
 
+import django
 import pytest
 from syrupy.extensions.single_file import SingleFileSnapshotExtension, WriteMode
 
 from bublik.mcp.models import JsonLog
 from bublik.mcp.processor import LogProcessor
+
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bublik.settings')
+django.setup()
 
 
 if TYPE_CHECKING:
