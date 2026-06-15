@@ -1,0 +1,37 @@
+# Run 49591 Overview
+
+| Field | Value |
+|---|---|
+| Run ID | 49591 |
+| Project | DPDK |
+| Status | DONE |
+| Status by NOK | error |
+| Conclusion | run-compromised |
+| Conclusion reason | Run marked as compromised |
+| Start | 2025-10-13 00:12:00+00:00 |
+| Finish | 2025-10-13 02:42:00+00:00 |
+| Duration | 2:30:00 |
+| Main package | dpdk-ethdev-ts |
+| Source | https://logs.example/run-49591 |
+| Requirements | none |
+| Result view | unexpected leaves |
+| Compromised | Yes |
+| Compromised comment | Infrastructure switch failed \| retry required |
+| Compromised bug | https://bugs.example/BUG-42 |
+| Important tags | ["nightly", "x86_64"] |
+| Relevant tags | ["dpdk-24.11"] |
+| Branches | [{"name": "main", "value": "main"}] |
+| Revisions | [{"name": "dpdk", "value": "abc123"}] |
+| Labels | ["performance"] |
+| Configuration | {"name": "host", "value": "lab-01"} |
+| Special categories | {"NIC": ["mlx5"]} |
+
+## Result Statistics
+
+| Result ID | Type | Path | Objective | Comments | Passed | Failed | Passed NOK | Failed NOK | Skipped | Skipped NOK | Abnormal | Total | NOK |
+|---:|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| - | - | - | - | - | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+*No unexpected or abnormal result leaves found.*
+
+*Use a test row Result ID with `get_run_leaf_results` to inspect its concrete executions.*

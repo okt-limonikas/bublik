@@ -53,6 +53,7 @@ def register_tools(mcp: FastMCP):  # noqa: C901
     async def get_run_overview(
         run_id: int,
         requirements: str | None = None,
+        unexpected_only: bool = False,
     ) -> str:
         '''
         Get a complete Markdown overview of a test run.
@@ -65,6 +66,8 @@ def register_tools(mcp: FastMCP):  # noqa: C901
         Args:
             run_id: The ID of the test run
             requirements: Optional semicolon-separated requirements filter
+            unexpected_only: Return only test leaves containing unexpected or
+                abnormal results
 
         Returns:
             Markdown document containing run details and aggregate statistics
@@ -76,7 +79,13 @@ def register_tools(mcp: FastMCP):  # noqa: C901
                 RunService.get_run_stats(run_id, requirements),
             ),
         )()
-        return render_run_overview(details, source, stats, requirements)
+        return render_run_overview(
+            details,
+            source,
+            stats,
+            requirements,
+            unexpected_only,
+        )
 
     @mcp.tool()
     async def get_run_leaf_results(

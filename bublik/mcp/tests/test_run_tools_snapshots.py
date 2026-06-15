@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -121,6 +122,85 @@ def test_run_overview_markdown(
     assert output == snapshot_md
 
 
+def test_run_overview_unexpected_leaves_markdown(
+    run_details: dict,
+    run_stats: dict,
+    snapshot_md: SnapshotAssertion,
+):
+    output = render_run_overview(
+        run_details,
+        'https://logs.example/run-49591',
+        run_stats,
+        'REQ-1;REQ-2',
+        unexpected_only=True,
+    )
+    assert output == snapshot_md
+
+
+def test_run_overview_empty_unexpected_leaves_markdown(
+    run_details: dict,
+    run_stats: dict,
+    snapshot_md: SnapshotAssertion,
+):
+    stats = copy.deepcopy(run_stats)
+    for node in _walk_stats(stats):
+        node['stats']['passed_unexpected'] = 0
+        node['stats']['failed_unexpected'] = 0
+        node['stats']['skipped_unexpected'] = 0
+        node['stats']['abnormal'] = 0
+
+    output = render_run_overview(
+        run_details,
+        'https://logs.example/run-49591',
+        stats,
+        None,
+        unexpected_only=True,
+    )
+    assert output == snapshot_md
+
+
+def _walk_stats(node: dict):
+    yield node
+    for child in node.get('children', []):
+        yield from _walk_stats(child)
+
+
+def test_run_overview_includes_abnormal_only_leaf(
+    run_details: dict,
+    run_stats: dict,
+):
+    stats = copy.deepcopy(run_stats)
+    leaf = next(node for node in _walk_stats(stats) if not node.get('children'))
+    leaf['stats']['abnormal'] = 1
+
+    output = render_run_overview(
+        run_details,
+        None,
+        stats,
+        None,
+        unexpected_only=True,
+    )
+
+    assert f'| {leaf["result_id"]} | test |' in output
+
+
+def test_run_overview_renders_comments_in_statistics_row(
+    run_details: dict,
+    run_stats: dict,
+):
+    stats = copy.deepcopy(run_stats)
+    stats['comments'] = [
+        {'comment': 'First | comment'},
+        {'comment': 'Second comment'},
+    ]
+
+    output = render_run_overview(run_details, None, stats, None)
+
+    root_row = next(line for line in output.splitlines() if line.startswith('| 49592 |'))
+    assert 'First \\| comment<br>Second comment' in root_row
+    assert '## Objectives and Comments' not in output
+
+
 def test_run_leaf_results_markdown(
     leaf_results: dict,
     snapshot_md: SnapshotAssertion,
@@ -222,10 +302,18 @@ def test_run_overview_tool_forwards_requirements(
     mcp = FakeMCP()
     register_tools(mcp)
 
-    output = asyncio.run(mcp.tools['get_run_overview'](49591, 'REQ-1;REQ-2'))
+    output = asyncio.run(
+        mcp.tools['get_run_overview'](
+            49591,
+            'REQ-1;REQ-2',
+            unexpected_only=True,
+        ),
+    )
 
     assert calls['stats'] == (49591, 'REQ-1;REQ-2')
     assert '| Requirements | REQ-1;REQ-2 |' in output
+    assert '| Result view | unexpected leaves |' in output
+    assert '| 49592 | package |' not in output
 
 
 def test_run_leaf_tool_forwards_filters(

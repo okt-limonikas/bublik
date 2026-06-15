@@ -30,11 +30,33 @@ def _flatten_stats(node: dict | None) -> list[dict]:
     return [node, *descendants]
 
 
+def _comments_text(comments: list) -> str:
+    values = [
+        comment.get('comment', comment) if isinstance(comment, dict) else comment
+        for comment in comments
+    ]
+    return '<br>'.join(str(value) for value in values) if values else '-'
+
+
+def _unexpected_count(node: dict) -> int:
+    node_stats = node.get('stats', {})
+    return sum(
+        node_stats.get(name, 0)
+        for name in (
+            'passed_unexpected',
+            'failed_unexpected',
+            'skipped_unexpected',
+            'abnormal',
+        )
+    )
+
+
 def render_run_overview(
     details: dict,
     source: str | None,
     stats: dict | None,
     requirements: str | None,
+    unexpected_only: bool = False,
 ) -> str:
     compromised = details.get('compromised') or {'status': False}
     rows = [
@@ -50,6 +72,7 @@ def render_run_overview(
         ('Main package', details.get('main_package')),
         ('Source', source),
         ('Requirements', requirements or 'none'),
+        ('Result view', 'unexpected leaves' if unexpected_only else 'all results'),
         ('Compromised', compromised.get('status', False)),
         ('Compromised comment', compromised.get('comment')),
         ('Compromised bug', compromised.get('bug_url') or compromised.get('bug_id')),
@@ -71,36 +94,38 @@ def render_run_overview(
         '## Result Statistics',
         '',
         (
-            '| Result ID | Type | Path | Passed | Failed | Passed NOK | Failed NOK | '
-            'Skipped | Skipped NOK | Abnormal | Total | NOK |'
+            '| Result ID | Type | Path | Objective | Comments | Passed | Failed | '
+            'Passed NOK | Failed NOK | Skipped | Skipped NOK | Abnormal | Total | NOK |'
         ),
-        '|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|',
+        '|---:|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|',
     ]
 
     stat_nodes = _flatten_stats(stats)
+    if unexpected_only:
+        stat_nodes = [
+            node
+            for node in stat_nodes
+            if not node.get('children') and _unexpected_count(node) > 0
+        ]
+
     for node in stat_nodes:
         node_stats = node.get('stats', {})
         total = sum(node_stats.values())
-        nok = sum(
-            node_stats.get(name, 0)
-            for name in (
-                'passed_unexpected',
-                'failed_unexpected',
-                'skipped_unexpected',
-                'abnormal',
-            )
-        )
+        nok = _unexpected_count(node)
         result_type = {'pkg': 'package', 'session': 'session', 'test': 'test'}.get(
             node.get('type'),
             node.get('type'),
         )
         lines.append(
-            '| {result_id} | {result_type} | {path} | {passed} | {failed} | '
+            '| {result_id} | {result_type} | {path} | {objective} | {comments} | '
+            '{passed} | {failed} | '
             '{passed_nok} | {failed_nok} | {skipped} | {skipped_nok} | '
             '{abnormal} | {total} | {nok} |'.format(
                 result_id=_cell(node.get('result_id')),
                 result_type=_cell(result_type),
                 path=_cell(' / '.join(node.get('path', []))),
+                objective=_cell(node.get('objective')),
+                comments=_cell(_comments_text(node.get('comments', []))),
                 passed=node_stats.get('passed', 0),
                 failed=node_stats.get('failed', 0),
                 passed_nok=node_stats.get('passed_unexpected', 0),
@@ -114,32 +139,15 @@ def render_run_overview(
         )
 
     if not stat_nodes:
-        lines.append('| - | - | - | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |')
-
-    annotations = [
-        node
-        for node in stat_nodes
-        if node.get('objective') or node.get('comments')
-    ]
-    if annotations:
-        lines.extend(
-            [
-                '',
-                '## Objectives and Comments',
-                '',
-                '| Result ID | Path | Objective | Comments |',
-                '|---:|---|---|---|',
-            ],
+        lines.append(
+            '| - | - | - | - | - | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |',
         )
-        for node in annotations:
-            comments = [
-                comment.get('comment', comment) if isinstance(comment, dict) else comment
-                for comment in node.get('comments', [])
-            ]
-            lines.append(
-                f'| {_cell(node.get("result_id"))} | '
-                f'{_cell(" / ".join(node.get("path", [])))} | '
-                f'{_cell(node.get("objective"))} | {_cell(comments)} |',
+        if unexpected_only:
+            lines.extend(
+                [
+                    '',
+                    '*No unexpected or abnormal result leaves found.*',
+                ],
             )
 
     lines.extend(

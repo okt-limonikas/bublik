@@ -14,6 +14,7 @@
 | Main package | dpdk-ethdev-ts |
 | Source | https://logs.example/run-49591 |
 | Requirements | REQ-1;REQ-2 |
+| Result view | all results |
 | Compromised | Yes |
 | Compromised comment | Infrastructure switch failed \| retry required |
 | Compromised bug | https://bugs.example/BUG-42 |
@@ -27,230 +28,219 @@
 
 ## Result Statistics
 
-| Result ID | Type | Path | Passed | Failed | Passed NOK | Failed NOK | Skipped | Skipped NOK | Abnormal | Total | NOK |
-|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 49592 | package | dpdk-ethdev-ts | 4037 | 1070 | 0 | 12 | 2483 | 0 | 0 | 7602 | 12 |
-| 49593 | test | dpdk-ethdev-ts / prologue | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 49594 | package | dpdk-ethdev-ts / usecases | 448 | 107 | 0 | 12 | 1218 | 0 | 0 | 1785 | 12 |
-| 49595 | test | dpdk-ethdev-ts / usecases / tx_burst_simple | 36 | 0 | 0 | 0 | 0 | 0 | 0 | 36 | 0 |
-| 49631 | test | dpdk-ethdev-ts / usecases / rx_burst_simple | 36 | 0 | 0 | 0 | 0 | 0 | 0 | 36 | 0 |
-| 49667 | test | dpdk-ethdev-ts / usecases / rx_one_packet_ip4 | 48 | 0 | 0 | 0 | 54 | 0 | 0 | 102 | 0 |
-| 49769 | test | dpdk-ethdev-ts / usecases / rx_one_packet_ip6 | 33 | 0 | 0 | 0 | 54 | 0 | 0 | 87 | 0 |
-| 49856 | test | dpdk-ethdev-ts / usecases / tx_multi_burst | 24 | 0 | 0 | 0 | 72 | 0 | 0 | 96 | 0 |
-| 49952 | test | dpdk-ethdev-ts / usecases / promiscuous_mode | 14 | 0 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| 49966 | test | dpdk-ethdev-ts / usecases / all_multicast_mode | 14 | 0 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| 49980 | test | dpdk-ethdev-ts / usecases / get_mtu | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 7 | 0 |
-| 49987 | test | dpdk-ethdev-ts / usecases / set_mtu | 6 | 36 | 0 | 0 | 0 | 0 | 0 | 42 | 0 |
-| 50029 | test | dpdk-ethdev-ts / usecases / set_default_mac_addr | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 7 | 0 |
-| 50036 | test | dpdk-ethdev-ts / usecases / test_detach | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 50037 | test | dpdk-ethdev-ts / usecases / dev_conf_rss_adv | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 50038 | test | dpdk-ethdev-ts / usecases / rss | 0 | 5 | 0 | 0 | 15 | 0 | 0 | 20 | 0 |
-| 50058 | test | dpdk-ethdev-ts / usecases / rss_hash_info | 0 | 2 | 0 | 0 | 10 | 0 | 0 | 12 | 0 |
-| 50070 | test | dpdk-ethdev-ts / usecases / rss_hash_conf_get | 0 | 6 | 0 | 0 | 8 | 0 | 0 | 14 | 0 |
-| 50084 | test | dpdk-ethdev-ts / usecases / update_rss_hash_conf | 0 | 20 | 0 | 0 | 80 | 0 | 0 | 100 | 0 |
-| 50184 | test | dpdk-ethdev-ts / usecases / rss_reta_query | 4 | 6 | 0 | 0 | 18 | 0 | 0 | 28 | 0 |
-| 50212 | test | dpdk-ethdev-ts / usecases / rss_reta_update | 0 | 5 | 0 | 0 | 20 | 0 | 0 | 25 | 0 |
-| 50237 | test | dpdk-ethdev-ts / usecases / flow_ctrl_get | 0 | 0 | 0 | 0 | 7 | 0 | 0 | 7 | 0 |
-| 50244 | session | dpdk-ethdev-ts / usecases / flow_ctrl_set_all | 0 | 0 | 0 | 0 | 448 | 0 | 0 | 448 | 0 |
-| 50245 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_mode | 0 | 0 | 0 | 0 | 28 | 0 | 0 | 28 | 0 |
-| 50273 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_high_low_water | 0 | 0 | 0 | 0 | 84 | 0 | 0 | 84 | 0 |
-| 50357 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_zero_pause_time | 0 | 0 | 0 | 0 | 28 | 0 | 0 | 28 | 0 |
-| 50385 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_pause_time | 0 | 0 | 0 | 0 | 140 | 0 | 0 | 140 | 0 |
-| 50525 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_send_xon | 0 | 0 | 0 | 0 | 56 | 0 | 0 | 56 | 0 |
-| 50581 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_autoneg | 0 | 0 | 0 | 0 | 56 | 0 | 0 | 56 | 0 |
-| 50637 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_mac_ctrl_frame_fwd | 0 | 0 | 0 | 0 | 56 | 0 | 0 | 56 | 0 |
-| 50693 | test | dpdk-ethdev-ts / usecases / rx_scatter | 15 | 0 | 0 | 0 | 0 | 0 | 0 | 15 | 0 |
-| 50708 | test | dpdk-ethdev-ts / usecases / rx_buf_size | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 0 |
-| 50740 | test | dpdk-ethdev-ts / usecases / link_up_down | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 50741 | test | dpdk-ethdev-ts / usecases / deferred_start_rx_queue | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
-| 50761 | test | dpdk-ethdev-ts / usecases / deferred_start_tx_queue | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
-| 50781 | test | dpdk-ethdev-ts / usecases / runtime_rx_queue_setup_with_flow | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
-| 50801 | test | dpdk-ethdev-ts / usecases / runtime_rx_queue_setup_with_rss | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 50805 | test | dpdk-ethdev-ts / usecases / runtime_tx_queue_setup | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
-| 50811 | test | dpdk-ethdev-ts / usecases / rx_stats | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 18 | 0 |
-| 50829 | test | dpdk-ethdev-ts / usecases / tx_stats | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 18 | 0 |
-| 50847 | test | dpdk-ethdev-ts / usecases / xstats_by_id | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 50848 | test | dpdk-ethdev-ts / usecases / xstats_dev_state | 14 | 0 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| 50862 | test | dpdk-ethdev-ts / usecases / stats_reset | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 50863 | test | dpdk-ethdev-ts / usecases / rx_descriptor_status | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 50864 | test | dpdk-ethdev-ts / usecases / rx_desc_nb | 16 | 0 | 0 | 0 | 2 | 0 | 0 | 18 | 0 |
-| 50882 | test | dpdk-ethdev-ts / usecases / tx_desc_nb | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 18 | 0 |
-| 50900 | test | dpdk-ethdev-ts / usecases / tunnel_udp_port_config | 0 | 0 | 0 | 0 | 21 | 0 | 0 | 21 | 0 |
-| 50921 | test | dpdk-ethdev-ts / usecases / tx_descriptor_status | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 50922 | test | dpdk-ethdev-ts / usecases / rx_offload_checksum | 8 | 4 | 0 | 0 | 8 | 0 | 0 | 20 | 0 |
-| 50942 | test | dpdk-ethdev-ts / usecases / rx_ptype_ip4 | 0 | 0 | 0 | 0 | 102 | 0 | 0 | 102 | 0 |
-| 51044 | test | dpdk-ethdev-ts / usecases / rx_ptype_ip6 | 0 | 0 | 0 | 0 | 87 | 0 | 0 | 87 | 0 |
-| 51131 | test | dpdk-ethdev-ts / usecases / rx_ring_wrap | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 |
-| 51137 | test | dpdk-ethdev-ts / usecases / set_mc_addr_list | 0 | 0 | 0 | 0 | 21 | 0 | 0 | 21 | 0 |
-| 51158 | test | dpdk-ethdev-ts / usecases / fw_version | 0 | 0 | 0 | 0 | 7 | 0 | 0 | 7 | 0 |
-| 51165 | test | dpdk-ethdev-ts / usecases / dev_reconfigure | 0 | 0 | 0 | 0 | 8 | 0 | 0 | 8 | 0 |
-| 51173 | test | dpdk-ethdev-ts / usecases / dev_info_persistence | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 7 | 0 |
-| 51180 | test | dpdk-ethdev-ts / usecases / rx_intr | 0 | 10 | 0 | 0 | 0 | 0 | 0 | 10 | 0 |
-| 51190 | test | dpdk-ethdev-ts / usecases / vlan_strip_ip4 | 48 | 0 | 0 | 0 | 64 | 0 | 0 | 112 | 0 |
-| 51302 | test | dpdk-ethdev-ts / usecases / vlan_strip_ip6 | 16 | 0 | 0 | 0 | 32 | 0 | 0 | 48 | 0 |
-| 51350 | test | dpdk-ethdev-ts / usecases / vlan_filter | 0 | 0 | 0 | 12 | 0 | 0 | 0 | 12 | 12 |
-| 51362 | test | dpdk-ethdev-ts / usecases / tx_pvid | 0 | 12 | 0 | 0 | 6 | 0 | 0 | 18 | 0 |
-| 51380 | test | dpdk-ethdev-ts / usecases / io_forward_and_drop | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 51381 | package | dpdk-ethdev-ts / xmit | 3588 | 963 | 0 | 0 | 704 | 0 | 0 | 5255 | 0 |
-| 51382 | session | dpdk-ethdev-ts / xmit / one_packet_all | 3448 | 948 | 0 | 0 | 640 | 0 | 0 | 5036 | 0 |
-| 51383 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_tunnel | 12 | 0 | 0 | 0 | 0 | 0 | 0 | 12 | 0 |
-| 51395 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 | 1004 | 252 | 0 | 0 | 160 | 0 | 0 | 1416 | 0 |
-| 51396 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 | 500 | 140 | 0 | 0 | 0 | 0 | 0 | 640 | 0 |
-| 51397 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_contig | 80 | 0 | 0 | 0 | 0 | 0 | 0 | 80 | 0 |
-| 51477 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_seg | 240 | 80 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
-| 51797 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_many_seg | 180 | 60 | 0 | 0 | 0 | 0 | 0 | 240 | 0 |
-| 52037 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
-| 52038 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_contig | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
-| 52094 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_seg | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
-| 52318 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_many_seg | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
-| 52654 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 52655 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 52671 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 52703 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 52735 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 52736 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 52752 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 52784 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 52816 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 | 964 | 292 | 0 | 0 | 160 | 0 | 0 | 1416 | 0 |
-| 52817 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 | 460 | 180 | 0 | 0 | 0 | 0 | 0 | 640 | 0 |
-| 52818 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_contig | 80 | 0 | 0 | 0 | 0 | 0 | 0 | 80 | 0 |
-| 52898 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_seg | 240 | 80 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
-| 53218 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_many_seg | 140 | 100 | 0 | 0 | 0 | 0 | 0 | 240 | 0 |
-| 53458 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
-| 53459 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_contig | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
-| 53515 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_seg | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
-| 53739 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_many_seg | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
-| 54075 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 54076 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 54092 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 54124 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 54156 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 54157 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 54173 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 54205 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 54237 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 | 744 | 192 | 0 | 0 | 160 | 0 | 0 | 1096 | 0 |
-| 54238 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 | 240 | 80 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
-| 54239 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_contig | 40 | 0 | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
-| 54279 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_seg | 120 | 40 | 0 | 0 | 0 | 0 | 0 | 160 | 0 |
-| 54439 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_many_seg | 80 | 40 | 0 | 0 | 0 | 0 | 0 | 120 | 0 |
-| 54559 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
-| 54560 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_contig | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
-| 54616 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_seg | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
-| 54840 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_many_seg | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
-| 55176 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 55177 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 55193 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 55225 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 55257 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 55258 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 55274 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 55306 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 55338 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 | 724 | 212 | 0 | 0 | 160 | 0 | 0 | 1096 | 0 |
-| 55339 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 | 220 | 100 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
-| 55340 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_contig | 40 | 0 | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
-| 55380 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_seg | 120 | 40 | 0 | 0 | 0 | 0 | 0 | 160 | 0 |
-| 55540 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_many_seg | 60 | 60 | 0 | 0 | 0 | 0 | 0 | 120 | 0 |
-| 55660 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
-| 55661 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_contig | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
-| 55717 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_seg | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
-| 55941 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_many_seg | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
-| 56277 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 56278 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 56294 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 56326 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 56358 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
-| 56359 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_contig | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 56375 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 56407 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_many_seg | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
-| 56439 | test | dpdk-ethdev-ts / xmit / alternate_vlan | 40 | 0 | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
-| 56479 | test | dpdk-ethdev-ts / xmit / vlan_on_port_restart | 10 | 10 | 0 | 0 | 0 | 0 | 0 | 20 | 0 |
-| 56499 | test | dpdk-ethdev-ts / xmit / vlan_on_packet_drop | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 56500 | test | dpdk-ethdev-ts / xmit / vlan_txqs_interference | 10 | 0 | 0 | 0 | 20 | 0 | 0 | 30 | 0 |
-| 56530 | test | dpdk-ethdev-ts / xmit / reap_on_stop | 60 | 0 | 0 | 0 | 0 | 0 | 0 | 60 | 0 |
-| 56590 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all | 19 | 5 | 0 | 0 | 44 | 0 | 0 | 68 | 0 |
-| 56591 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / one_packet_with_dpdk_rx_prologue | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 56592 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session | 17 | 5 | 0 | 0 | 44 | 0 | 0 | 66 | 0 |
-| 56593 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads | 16 | 0 | 0 | 0 | 32 | 0 | 0 | 48 | 0 |
-| 56594 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_plain | 8 | 0 | 0 | 0 | 4 | 0 | 0 | 12 | 0 |
-| 56595 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_plain / one_packet_with_dpdk_rx_cksum_offloads_plain_ip4 | 4 | 0 | 0 | 0 | 4 | 0 | 0 | 8 | 0 |
-| 56603 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_plain / one_packet_with_dpdk_rx_cksum_offloads_plain_ip6 | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 0 |
-| 56607 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap | 8 | 0 | 0 | 0 | 10 | 0 | 0 | 18 | 0 |
-| 56608 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 6 | 0 |
-| 56609 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 4 | 0 |
-| 56613 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
-| 56615 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
-| 56616 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 56620 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 56622 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 6 | 0 |
-| 56623 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip4 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 4 | 0 |
-| 56627 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip6 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
-| 56629 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap | 0 | 0 | 0 | 0 | 18 | 0 | 0 | 18 | 0 |
-| 56630 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
-| 56631 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 56635 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 56637 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
-| 56638 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 56642 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 56644 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
-| 56645 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip4 | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 56649 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip6 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 56651 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases | 1 | 5 | 0 | 0 | 12 | 0 | 0 | 18 | 0 |
-| 56652 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 2 | 0 |
-| 56653 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_plain | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 56654 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_encap | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56655 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 56656 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_plain | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56657 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_encap | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56658 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 2 | 0 |
-| 56659 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_plain | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 56660 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_encap | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56661 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 2 | 0 |
-| 56662 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_plain | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 56663 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_encap | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56664 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_payload_segments | 0 | 3 | 0 | 0 | 3 | 0 | 0 | 6 | 0 |
-| 56665 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_payload_segments / tso_packet_with_dpdk_rx_too_many_payload_segments_plain | 0 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
-| 56668 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_payload_segments / tso_packet_with_dpdk_rx_too_many_payload_segments_encap | 0 | 0 | 0 | 0 | 3 | 0 | 0 | 3 | 0 |
-| 56671 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 56672 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_plain | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56673 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_encap | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56674 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 56675 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_plain | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56676 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_encap | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 56677 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / one_packet_with_dpdk_rx_epilogue | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 56678 | package | dpdk-ethdev-ts / filters | 0 | 0 | 0 | 0 | 560 | 0 | 0 | 560 | 0 |
-| 56679 | test | dpdk-ethdev-ts / filters / flow_rule_in2q | 0 | 0 | 0 | 0 | 78 | 0 | 0 | 78 | 0 |
-| 56757 | test | dpdk-ethdev-ts / filters / flow_rule_in2q_ip6 | 0 | 0 | 0 | 0 | 9 | 0 | 0 | 9 | 0 |
-| 56766 | test | dpdk-ethdev-ts / filters / flow_rule_in2q_tunnel | 0 | 0 | 0 | 0 | 42 | 0 | 0 | 42 | 0 |
-| 56808 | test | dpdk-ethdev-ts / filters / flow_rule_rss | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
-| 56814 | test | dpdk-ethdev-ts / filters / flow_rule_drop | 0 | 0 | 0 | 0 | 52 | 0 | 0 | 52 | 0 |
-| 56866 | session | dpdk-ethdev-ts / filters / flow_rule_drop_and_count | 0 | 0 | 0 | 0 | 255 | 0 | 0 | 255 | 0 |
-| 56867 | test | dpdk-ethdev-ts / filters / flow_rule_drop_and_count / flow_rule_drop_and_count_ip4 | 0 | 0 | 0 | 0 | 130 | 0 | 0 | 130 | 0 |
-| 56997 | test | dpdk-ethdev-ts / filters / flow_rule_drop_and_count / flow_rule_drop_and_count_ip6 | 0 | 0 | 0 | 0 | 15 | 0 | 0 | 15 | 0 |
-| 57012 | test | dpdk-ethdev-ts / filters / flow_rule_drop_and_count / flow_rule_drop_and_count_tunnel | 0 | 0 | 0 | 0 | 110 | 0 | 0 | 110 | 0 |
-| 57122 | test | dpdk-ethdev-ts / filters / flow_rule_vlan | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 57126 | session | dpdk-ethdev-ts / filters / flow_rule_mark_and_flag | 0 | 0 | 0 | 0 | 25 | 0 | 0 | 25 | 0 |
-| 57127 | test | dpdk-ethdev-ts / filters / flow_rule_mark_and_flag / flow_rule_flag | 0 | 0 | 0 | 0 | 5 | 0 | 0 | 5 | 0 |
-| 57132 | test | dpdk-ethdev-ts / filters / flow_rule_mark_and_flag / flow_rule_mark | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
-| 57152 | test | dpdk-ethdev-ts / filters / flow_rule_counters | 0 | 0 | 0 | 0 | 26 | 0 | 0 | 26 | 0 |
-| 57178 | test | dpdk-ethdev-ts / filters / flow_rule_encap_on_egress | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 57182 | test | dpdk-ethdev-ts / filters / flow_rule_decap_on_ingress | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 57184 | test | dpdk-ethdev-ts / filters / flow_rule_vlan_push | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
-| 57200 | test | dpdk-ethdev-ts / filters / flow_rule_multi_count | 0 | 0 | 0 | 0 | 30 | 0 | 0 | 30 | 0 |
-| 57230 | test | dpdk-ethdev-ts / filters / flow_rule_reflect | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
-| 57232 | test | dpdk-ethdev-ts / filters / flow_rule_dec_ttl | 0 | 0 | 0 | 0 | 5 | 0 | 0 | 5 | 0 |
-| 57237 | test | dpdk-ethdev-ts / filters / flow_tunnel | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
-| 57241 | package | dpdk-ethdev-ts / representors | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-| 57242 | test | dpdk-ethdev-ts / representors / rep_prologue | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
-
-## Objectives and Comments
-
-| Result ID | Path | Objective | Comments |
-|---:|---|---|---|
-| 49592 | dpdk-ethdev-ts | DPDM EthDev Test Suite | - |
-| 49594 | dpdk-ethdev-ts / usecases | Main use cases of the PMD | - |
-| 51380 | dpdk-ethdev-ts / usecases / io_forward_and_drop | Check that IO-forwarded packets do not erroneously bypass the flow engine | - |
-| 51381 | dpdk-ethdev-ts / xmit | Transmit Functionality | - |
-| 56678 | dpdk-ethdev-ts / filters | Filters | - |
-| 57241 | dpdk-ethdev-ts / representors | Representors | - |
+| Result ID | Type | Path | Objective | Comments | Passed | Failed | Passed NOK | Failed NOK | Skipped | Skipped NOK | Abnormal | Total | NOK |
+|---:|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 49592 | package | dpdk-ethdev-ts | DPDM EthDev Test Suite | - | 4037 | 1070 | 0 | 12 | 2483 | 0 | 0 | 7602 | 12 |
+| 49593 | test | dpdk-ethdev-ts / prologue | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 49594 | package | dpdk-ethdev-ts / usecases | Main use cases of the PMD | - | 448 | 107 | 0 | 12 | 1218 | 0 | 0 | 1785 | 12 |
+| 49595 | test | dpdk-ethdev-ts / usecases / tx_burst_simple | - | - | 36 | 0 | 0 | 0 | 0 | 0 | 0 | 36 | 0 |
+| 49631 | test | dpdk-ethdev-ts / usecases / rx_burst_simple | - | - | 36 | 0 | 0 | 0 | 0 | 0 | 0 | 36 | 0 |
+| 49667 | test | dpdk-ethdev-ts / usecases / rx_one_packet_ip4 | - | - | 48 | 0 | 0 | 0 | 54 | 0 | 0 | 102 | 0 |
+| 49769 | test | dpdk-ethdev-ts / usecases / rx_one_packet_ip6 | - | - | 33 | 0 | 0 | 0 | 54 | 0 | 0 | 87 | 0 |
+| 49856 | test | dpdk-ethdev-ts / usecases / tx_multi_burst | - | - | 24 | 0 | 0 | 0 | 72 | 0 | 0 | 96 | 0 |
+| 49952 | test | dpdk-ethdev-ts / usecases / promiscuous_mode | - | - | 14 | 0 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
+| 49966 | test | dpdk-ethdev-ts / usecases / all_multicast_mode | - | - | 14 | 0 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
+| 49980 | test | dpdk-ethdev-ts / usecases / get_mtu | - | - | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 7 | 0 |
+| 49987 | test | dpdk-ethdev-ts / usecases / set_mtu | - | - | 6 | 36 | 0 | 0 | 0 | 0 | 0 | 42 | 0 |
+| 50029 | test | dpdk-ethdev-ts / usecases / set_default_mac_addr | - | - | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 7 | 0 |
+| 50036 | test | dpdk-ethdev-ts / usecases / test_detach | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 50037 | test | dpdk-ethdev-ts / usecases / dev_conf_rss_adv | - | - | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 50038 | test | dpdk-ethdev-ts / usecases / rss | - | - | 0 | 5 | 0 | 0 | 15 | 0 | 0 | 20 | 0 |
+| 50058 | test | dpdk-ethdev-ts / usecases / rss_hash_info | - | - | 0 | 2 | 0 | 0 | 10 | 0 | 0 | 12 | 0 |
+| 50070 | test | dpdk-ethdev-ts / usecases / rss_hash_conf_get | - | - | 0 | 6 | 0 | 0 | 8 | 0 | 0 | 14 | 0 |
+| 50084 | test | dpdk-ethdev-ts / usecases / update_rss_hash_conf | - | - | 0 | 20 | 0 | 0 | 80 | 0 | 0 | 100 | 0 |
+| 50184 | test | dpdk-ethdev-ts / usecases / rss_reta_query | - | - | 4 | 6 | 0 | 0 | 18 | 0 | 0 | 28 | 0 |
+| 50212 | test | dpdk-ethdev-ts / usecases / rss_reta_update | - | - | 0 | 5 | 0 | 0 | 20 | 0 | 0 | 25 | 0 |
+| 50237 | test | dpdk-ethdev-ts / usecases / flow_ctrl_get | - | - | 0 | 0 | 0 | 0 | 7 | 0 | 0 | 7 | 0 |
+| 50244 | session | dpdk-ethdev-ts / usecases / flow_ctrl_set_all | - | - | 0 | 0 | 0 | 0 | 448 | 0 | 0 | 448 | 0 |
+| 50245 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_mode | - | - | 0 | 0 | 0 | 0 | 28 | 0 | 0 | 28 | 0 |
+| 50273 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_high_low_water | - | - | 0 | 0 | 0 | 0 | 84 | 0 | 0 | 84 | 0 |
+| 50357 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_zero_pause_time | - | - | 0 | 0 | 0 | 0 | 28 | 0 | 0 | 28 | 0 |
+| 50385 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_pause_time | - | - | 0 | 0 | 0 | 0 | 140 | 0 | 0 | 140 | 0 |
+| 50525 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_send_xon | - | - | 0 | 0 | 0 | 0 | 56 | 0 | 0 | 56 | 0 |
+| 50581 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_autoneg | - | - | 0 | 0 | 0 | 0 | 56 | 0 | 0 | 56 | 0 |
+| 50637 | test | dpdk-ethdev-ts / usecases / flow_ctrl_set_all / flow_ctrl_set_mac_ctrl_frame_fwd | - | - | 0 | 0 | 0 | 0 | 56 | 0 | 0 | 56 | 0 |
+| 50693 | test | dpdk-ethdev-ts / usecases / rx_scatter | - | - | 15 | 0 | 0 | 0 | 0 | 0 | 0 | 15 | 0 |
+| 50708 | test | dpdk-ethdev-ts / usecases / rx_buf_size | - | - | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 0 |
+| 50740 | test | dpdk-ethdev-ts / usecases / link_up_down | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 50741 | test | dpdk-ethdev-ts / usecases / deferred_start_rx_queue | - | - | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
+| 50761 | test | dpdk-ethdev-ts / usecases / deferred_start_tx_queue | - | - | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
+| 50781 | test | dpdk-ethdev-ts / usecases / runtime_rx_queue_setup_with_flow | - | - | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
+| 50801 | test | dpdk-ethdev-ts / usecases / runtime_rx_queue_setup_with_rss | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 50805 | test | dpdk-ethdev-ts / usecases / runtime_tx_queue_setup | - | - | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
+| 50811 | test | dpdk-ethdev-ts / usecases / rx_stats | - | - | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 18 | 0 |
+| 50829 | test | dpdk-ethdev-ts / usecases / tx_stats | - | - | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 18 | 0 |
+| 50847 | test | dpdk-ethdev-ts / usecases / xstats_by_id | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 50848 | test | dpdk-ethdev-ts / usecases / xstats_dev_state | - | - | 14 | 0 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
+| 50862 | test | dpdk-ethdev-ts / usecases / stats_reset | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 50863 | test | dpdk-ethdev-ts / usecases / rx_descriptor_status | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 50864 | test | dpdk-ethdev-ts / usecases / rx_desc_nb | - | - | 16 | 0 | 0 | 0 | 2 | 0 | 0 | 18 | 0 |
+| 50882 | test | dpdk-ethdev-ts / usecases / tx_desc_nb | - | - | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 18 | 0 |
+| 50900 | test | dpdk-ethdev-ts / usecases / tunnel_udp_port_config | - | - | 0 | 0 | 0 | 0 | 21 | 0 | 0 | 21 | 0 |
+| 50921 | test | dpdk-ethdev-ts / usecases / tx_descriptor_status | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 50922 | test | dpdk-ethdev-ts / usecases / rx_offload_checksum | - | - | 8 | 4 | 0 | 0 | 8 | 0 | 0 | 20 | 0 |
+| 50942 | test | dpdk-ethdev-ts / usecases / rx_ptype_ip4 | - | - | 0 | 0 | 0 | 0 | 102 | 0 | 0 | 102 | 0 |
+| 51044 | test | dpdk-ethdev-ts / usecases / rx_ptype_ip6 | - | - | 0 | 0 | 0 | 0 | 87 | 0 | 0 | 87 | 0 |
+| 51131 | test | dpdk-ethdev-ts / usecases / rx_ring_wrap | - | - | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 |
+| 51137 | test | dpdk-ethdev-ts / usecases / set_mc_addr_list | - | - | 0 | 0 | 0 | 0 | 21 | 0 | 0 | 21 | 0 |
+| 51158 | test | dpdk-ethdev-ts / usecases / fw_version | - | - | 0 | 0 | 0 | 0 | 7 | 0 | 0 | 7 | 0 |
+| 51165 | test | dpdk-ethdev-ts / usecases / dev_reconfigure | - | - | 0 | 0 | 0 | 0 | 8 | 0 | 0 | 8 | 0 |
+| 51173 | test | dpdk-ethdev-ts / usecases / dev_info_persistence | - | - | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 7 | 0 |
+| 51180 | test | dpdk-ethdev-ts / usecases / rx_intr | - | - | 0 | 10 | 0 | 0 | 0 | 0 | 0 | 10 | 0 |
+| 51190 | test | dpdk-ethdev-ts / usecases / vlan_strip_ip4 | - | - | 48 | 0 | 0 | 0 | 64 | 0 | 0 | 112 | 0 |
+| 51302 | test | dpdk-ethdev-ts / usecases / vlan_strip_ip6 | - | - | 16 | 0 | 0 | 0 | 32 | 0 | 0 | 48 | 0 |
+| 51350 | test | dpdk-ethdev-ts / usecases / vlan_filter | - | - | 0 | 0 | 0 | 12 | 0 | 0 | 0 | 12 | 12 |
+| 51362 | test | dpdk-ethdev-ts / usecases / tx_pvid | - | - | 0 | 12 | 0 | 0 | 6 | 0 | 0 | 18 | 0 |
+| 51380 | test | dpdk-ethdev-ts / usecases / io_forward_and_drop | Check that IO-forwarded packets do not erroneously bypass the flow engine | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 51381 | package | dpdk-ethdev-ts / xmit | Transmit Functionality | - | 3588 | 963 | 0 | 0 | 704 | 0 | 0 | 5255 | 0 |
+| 51382 | session | dpdk-ethdev-ts / xmit / one_packet_all | - | - | 3448 | 948 | 0 | 0 | 640 | 0 | 0 | 5036 | 0 |
+| 51383 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_tunnel | - | - | 12 | 0 | 0 | 0 | 0 | 0 | 0 | 12 | 0 |
+| 51395 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 | - | - | 1004 | 252 | 0 | 0 | 160 | 0 | 0 | 1416 | 0 |
+| 51396 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 | - | - | 500 | 140 | 0 | 0 | 0 | 0 | 0 | 640 | 0 |
+| 51397 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_contig | - | - | 80 | 0 | 0 | 0 | 0 | 0 | 0 | 80 | 0 |
+| 51477 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_seg | - | - | 240 | 80 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
+| 51797 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_many_seg | - | - | 180 | 60 | 0 | 0 | 0 | 0 | 0 | 240 | 0 |
+| 52037 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 | - | - | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
+| 52038 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_contig | - | - | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
+| 52094 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_seg | - | - | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
+| 52318 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_many_seg | - | - | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
+| 52654 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 52655 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 52671 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 52703 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 52735 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 52736 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 52752 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 52784 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 52816 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 | - | - | 964 | 292 | 0 | 0 | 160 | 0 | 0 | 1416 | 0 |
+| 52817 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 | - | - | 460 | 180 | 0 | 0 | 0 | 0 | 0 | 640 | 0 |
+| 52818 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_contig | - | - | 80 | 0 | 0 | 0 | 0 | 0 | 0 | 80 | 0 |
+| 52898 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_seg | - | - | 240 | 80 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
+| 53218 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / one_packet_ip4 / one_packet_ip4_many_seg | - | - | 140 | 100 | 0 | 0 | 0 | 0 | 0 | 240 | 0 |
+| 53458 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 | - | - | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
+| 53459 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_contig | - | - | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
+| 53515 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_seg | - | - | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
+| 53739 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4 / tso_packet_ip4_many_seg | - | - | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
+| 54075 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 54076 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 54092 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 54124 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip4_encap_ip4 / tso_packet_ip4_encap_ip4_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 54156 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 54157 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 54173 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 54205 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip4 / tso_packet_ip6_encap_ip4 / tso_packet_ip6_encap_ip4_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 54237 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 | - | - | 744 | 192 | 0 | 0 | 160 | 0 | 0 | 1096 | 0 |
+| 54238 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 | - | - | 240 | 80 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
+| 54239 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_contig | - | - | 40 | 0 | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
+| 54279 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_seg | - | - | 120 | 40 | 0 | 0 | 0 | 0 | 0 | 160 | 0 |
+| 54439 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_many_seg | - | - | 80 | 40 | 0 | 0 | 0 | 0 | 0 | 120 | 0 |
+| 54559 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 | - | - | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
+| 54560 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_contig | - | - | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
+| 54616 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_seg | - | - | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
+| 54840 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_many_seg | - | - | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
+| 55176 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 55177 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 55193 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 55225 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 55257 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 55258 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 55274 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 55306 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 55338 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 | - | - | 724 | 212 | 0 | 0 | 160 | 0 | 0 | 1096 | 0 |
+| 55339 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 | - | - | 220 | 100 | 0 | 0 | 0 | 0 | 0 | 320 | 0 |
+| 55340 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_contig | - | - | 40 | 0 | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
+| 55380 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_seg | - | - | 120 | 40 | 0 | 0 | 0 | 0 | 0 | 160 | 0 |
+| 55540 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / one_packet_ip6 / one_packet_ip6_many_seg | - | - | 60 | 60 | 0 | 0 | 0 | 0 | 0 | 120 | 0 |
+| 55660 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 | - | - | 504 | 112 | 0 | 0 | 0 | 0 | 0 | 616 | 0 |
+| 55661 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_contig | - | - | 56 | 0 | 0 | 0 | 0 | 0 | 0 | 56 | 0 |
+| 55717 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_seg | - | - | 112 | 112 | 0 | 0 | 0 | 0 | 0 | 224 | 0 |
+| 55941 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6 / tso_packet_ip6_many_seg | - | - | 336 | 0 | 0 | 0 | 0 | 0 | 0 | 336 | 0 |
+| 56277 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 56278 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 56294 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 56326 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip4_encap_ip6 / tso_packet_ip4_encap_ip6_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 56358 | session | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 | - | - | 0 | 0 | 0 | 0 | 80 | 0 | 0 | 80 | 0 |
+| 56359 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_contig | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 56375 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 56407 | test | dpdk-ethdev-ts / xmit / one_packet_all / one_packet_ip6 / tso_packet_ip6_encap_ip6 / tso_packet_ip6_encap_ip6_many_seg | - | - | 0 | 0 | 0 | 0 | 32 | 0 | 0 | 32 | 0 |
+| 56439 | test | dpdk-ethdev-ts / xmit / alternate_vlan | - | - | 40 | 0 | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
+| 56479 | test | dpdk-ethdev-ts / xmit / vlan_on_port_restart | - | - | 10 | 10 | 0 | 0 | 0 | 0 | 0 | 20 | 0 |
+| 56499 | test | dpdk-ethdev-ts / xmit / vlan_on_packet_drop | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 56500 | test | dpdk-ethdev-ts / xmit / vlan_txqs_interference | - | - | 10 | 0 | 0 | 0 | 20 | 0 | 0 | 30 | 0 |
+| 56530 | test | dpdk-ethdev-ts / xmit / reap_on_stop | - | - | 60 | 0 | 0 | 0 | 0 | 0 | 0 | 60 | 0 |
+| 56590 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all | - | - | 19 | 5 | 0 | 0 | 44 | 0 | 0 | 68 | 0 |
+| 56591 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / one_packet_with_dpdk_rx_prologue | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 56592 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session | - | - | 17 | 5 | 0 | 0 | 44 | 0 | 0 | 66 | 0 |
+| 56593 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads | - | - | 16 | 0 | 0 | 0 | 32 | 0 | 0 | 48 | 0 |
+| 56594 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_plain | - | - | 8 | 0 | 0 | 0 | 4 | 0 | 0 | 12 | 0 |
+| 56595 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_plain / one_packet_with_dpdk_rx_cksum_offloads_plain_ip4 | - | - | 4 | 0 | 0 | 0 | 4 | 0 | 0 | 8 | 0 |
+| 56603 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_plain / one_packet_with_dpdk_rx_cksum_offloads_plain_ip6 | - | - | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 0 |
+| 56607 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap | - | - | 8 | 0 | 0 | 0 | 10 | 0 | 0 | 18 | 0 |
+| 56608 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | - | - | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 6 | 0 |
+| 56609 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | - | - | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 4 | 0 |
+| 56613 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | - | - | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
+| 56615 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | - | - | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
+| 56616 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 56620 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 56622 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 | - | - | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 6 | 0 |
+| 56623 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip4 | - | - | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 4 | 0 |
+| 56627 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip6 | - | - | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
+| 56629 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap | - | - | 0 | 0 | 0 | 0 | 18 | 0 | 0 | 18 | 0 |
+| 56630 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | - | - | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
+| 56631 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 56635 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 56637 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 | - | - | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
+| 56638 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip4 | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 56642 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip4_inner_ip6 | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 56644 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 | - | - | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
+| 56645 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip4 | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 56649 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / one_packet_with_dpdk_rx_cksum_offloads / one_packet_with_dpdk_rx_cksum_offloads_encap / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6 / one_packet_with_dpdk_rx_cksum_offloads_encap_ip6_inner_ip6 | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 56651 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases | - | - | 1 | 5 | 0 | 0 | 12 | 0 | 0 | 18 | 0 |
+| 56652 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames | - | - | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 2 | 0 |
+| 56653 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_plain | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 56654 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_encap | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56655 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 56656 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_plain | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56657 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_outgoing_frames / tso_packet_with_dpdk_rx_too_many_outgoing_frames_encap | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56658 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments | - | - | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 2 | 0 |
+| 56659 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_plain | - | - | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 56660 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_encap | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56661 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments | - | - | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 2 | 0 |
+| 56662 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_plain | - | - | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 56663 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_header_segments / tso_packet_with_dpdk_rx_too_many_header_segments_encap | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56664 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_payload_segments | - | - | 0 | 3 | 0 | 0 | 3 | 0 | 0 | 6 | 0 |
+| 56665 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_payload_segments / tso_packet_with_dpdk_rx_too_many_payload_segments_plain | - | - | 0 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
+| 56668 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_many_payload_segments / tso_packet_with_dpdk_rx_too_many_payload_segments_encap | - | - | 0 | 0 | 0 | 0 | 3 | 0 | 0 | 3 | 0 |
+| 56671 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 56672 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_plain | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56673 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_encap | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56674 | session | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 56675 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_plain | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56676 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / session / tso_packet_with_dpdk_rx_corner_cases / tso_packet_with_dpdk_rx_too_long_payload / tso_packet_with_dpdk_rx_too_long_payload_encap | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 56677 | test | dpdk-ethdev-ts / xmit / one_packet_with_dpdk_rx_all / one_packet_with_dpdk_rx_epilogue | - | - | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| 56678 | package | dpdk-ethdev-ts / filters | Filters | - | 0 | 0 | 0 | 0 | 560 | 0 | 0 | 560 | 0 |
+| 56679 | test | dpdk-ethdev-ts / filters / flow_rule_in2q | - | - | 0 | 0 | 0 | 0 | 78 | 0 | 0 | 78 | 0 |
+| 56757 | test | dpdk-ethdev-ts / filters / flow_rule_in2q_ip6 | - | - | 0 | 0 | 0 | 0 | 9 | 0 | 0 | 9 | 0 |
+| 56766 | test | dpdk-ethdev-ts / filters / flow_rule_in2q_tunnel | - | - | 0 | 0 | 0 | 0 | 42 | 0 | 0 | 42 | 0 |
+| 56808 | test | dpdk-ethdev-ts / filters / flow_rule_rss | - | - | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 6 | 0 |
+| 56814 | test | dpdk-ethdev-ts / filters / flow_rule_drop | - | - | 0 | 0 | 0 | 0 | 52 | 0 | 0 | 52 | 0 |
+| 56866 | session | dpdk-ethdev-ts / filters / flow_rule_drop_and_count | - | - | 0 | 0 | 0 | 0 | 255 | 0 | 0 | 255 | 0 |
+| 56867 | test | dpdk-ethdev-ts / filters / flow_rule_drop_and_count / flow_rule_drop_and_count_ip4 | - | - | 0 | 0 | 0 | 0 | 130 | 0 | 0 | 130 | 0 |
+| 56997 | test | dpdk-ethdev-ts / filters / flow_rule_drop_and_count / flow_rule_drop_and_count_ip6 | - | - | 0 | 0 | 0 | 0 | 15 | 0 | 0 | 15 | 0 |
+| 57012 | test | dpdk-ethdev-ts / filters / flow_rule_drop_and_count / flow_rule_drop_and_count_tunnel | - | - | 0 | 0 | 0 | 0 | 110 | 0 | 0 | 110 | 0 |
+| 57122 | test | dpdk-ethdev-ts / filters / flow_rule_vlan | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 57126 | session | dpdk-ethdev-ts / filters / flow_rule_mark_and_flag | - | - | 0 | 0 | 0 | 0 | 25 | 0 | 0 | 25 | 0 |
+| 57127 | test | dpdk-ethdev-ts / filters / flow_rule_mark_and_flag / flow_rule_flag | - | - | 0 | 0 | 0 | 0 | 5 | 0 | 0 | 5 | 0 |
+| 57132 | test | dpdk-ethdev-ts / filters / flow_rule_mark_and_flag / flow_rule_mark | - | - | 0 | 0 | 0 | 0 | 20 | 0 | 0 | 20 | 0 |
+| 57152 | test | dpdk-ethdev-ts / filters / flow_rule_counters | - | - | 0 | 0 | 0 | 0 | 26 | 0 | 0 | 26 | 0 |
+| 57178 | test | dpdk-ethdev-ts / filters / flow_rule_encap_on_egress | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 57182 | test | dpdk-ethdev-ts / filters / flow_rule_decap_on_ingress | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 57184 | test | dpdk-ethdev-ts / filters / flow_rule_vlan_push | - | - | 0 | 0 | 0 | 0 | 16 | 0 | 0 | 16 | 0 |
+| 57200 | test | dpdk-ethdev-ts / filters / flow_rule_multi_count | - | - | 0 | 0 | 0 | 0 | 30 | 0 | 0 | 30 | 0 |
+| 57230 | test | dpdk-ethdev-ts / filters / flow_rule_reflect | - | - | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 0 |
+| 57232 | test | dpdk-ethdev-ts / filters / flow_rule_dec_ttl | - | - | 0 | 0 | 0 | 0 | 5 | 0 | 0 | 5 | 0 |
+| 57237 | test | dpdk-ethdev-ts / filters / flow_tunnel | - | - | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 4 | 0 |
+| 57241 | package | dpdk-ethdev-ts / representors | Representors | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
+| 57242 | test | dpdk-ethdev-ts / representors / rep_prologue | - | - | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 |
 
 *Use a test row Result ID with `get_run_leaf_results` to inspect its concrete executions.*
