@@ -5,8 +5,8 @@ Aggregate leaf: `51350`
 Run: `49591`
 Requirements: `REQ-1;REQ-2`
 
-| Result ID | Exec Seqno | Start | Obtained | Expected | Classification | Verdicts | Artifacts |
-|---:|---:|---|---|---|---|---|---:|
-| - | - | - | - | - | - | - | 0 |
+| Result ID | Start | Obtained | Expected | Classification | Verdicts | Artifacts |
+|---:|---|---|---|---|---|---:|
+| - | - | - | - | - | - | 0 |
 
 *Page 1 | 0 results | previous: - | next: -*

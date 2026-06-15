@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import OrderedDict
 
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
 
 from bublik.core.exceptions import NotFoundError
 
@@ -73,7 +72,7 @@ class PaginatedResult:
             msg = f'Page size must be <= {max_page_size}, got {page_size}'
             raise ValidationError(msg)
 
-        total_count = queryset.count() if isinstance(queryset, QuerySet) else len(queryset)
+        total_count = len(queryset)
         total_pages = max((total_count + page_size - 1) // page_size, 1)
 
         if page > total_pages:

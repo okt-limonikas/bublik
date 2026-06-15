@@ -178,23 +178,23 @@ def render_run_leaf_results(payload: RunLeafResultsPayload) -> str:
         f'Requirements: `{_cell(payload.requirements or "none")}`',
         '',
         (
-            '| Result ID | Exec Seqno | Start | Obtained | Expected | Classification | '
-            'Verdicts | Artifacts |'
+            '| Result ID | Start | Obtained | Expected | Classification | Verdicts | '
+            'Artifacts |'
         ),
-        '|---:|---:|---|---|---|---|---|---:|',
+        '|---:|---|---|---|---|---|---:|',
     ]
     for result in payload.results:
         obtained = result.obtained_result
         lines.append(
-            f'| {_cell(result.result_id)} | {_cell(result.exec_seqno)} | '
-            f'{_cell(result.start)} | {_cell(obtained.result_type)} | '
+            f'| {_cell(result.result_id)} | {_cell(result.start)} | '
+            f'{_cell(obtained.result_type)} | '
             f'{_cell(_expected_result_text(result.expected_results))} | '
             f'{_cell(result.classification)} | '
             f'{_cell(obtained.verdicts)} | '
             f'{len(result.artifacts)} |',
         )
     if not payload.results:
-        lines.append('| - | - | - | - | - | - | - | 0 |')
+        lines.append('| - | - | - | - | - | - | 0 |')
 
     page = 1
     if pagination.previous:

@@ -15,13 +15,11 @@ from pydantic import ValidationError as PydanticValidationError
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from bublik.core.pagination_helpers import PaginatedResult
-from bublik.core.result.services import ResultService
-from bublik.data.models import ResultType
-from bublik.data.models import TestIterationResult as ResultModel
+from bublik.core.exceptions import NotFoundError
 from bublik.mcp import tools as mcp_tools
 from bublik.mcp.models import RunLeafResultsPayload, RunOverviewPayload
 from bublik.mcp.run_markdown import render_run_leaf_results, render_run_overview
+from bublik.mcp.run_results import _get_run_leaf_results
 from bublik.mcp.tools import register_tools
 
 
@@ -97,7 +95,6 @@ def leaf_results() -> dict:
                 'project_id': 7,
                 'project_name': 'DPDK',
                 'iteration_id': 9001,
-                'exec_seqno': 1759,
                 'start': datetime(2025, 10, 13, 1, 1, 44, tzinfo=timezone.utc),
                 'obtained_result': {
                     'result_type': 'FAILED',
@@ -125,7 +122,6 @@ def leaf_results() -> dict:
                 'project_id': 7,
                 'project_name': 'DPDK',
                 'iteration_id': 9002,
-                'exec_seqno': 1760,
                 'start': datetime(2025, 10, 13, 1, 1, 46, tzinfo=timezone.utc),
                 'obtained_result': {
                     'result_type': 'PASSED',
@@ -378,70 +374,43 @@ def test_run_leaf_payload_rejects_invalid_data(
     assert rendered_errors == error_path
 
 
-def _result(result_id: int, name: str, result_type: str = ResultType.TEST):
-    test = SimpleNamespace(name=name, result_type=ResultType.conv(result_type))
-    return SimpleNamespace(
-        id=result_id,
-        iteration=SimpleNamespace(test=test),
-    )
-
-
-def test_stats_leaf_group_contains_consecutive_same_named_tests():
-    results = [
-        _result(1, 'prologue'),
-        _result(2, 'vlan_filter'),
-        _result(3, 'vlan_filter'),
-        _result(4, 'vlan_filter'),
-        _result(5, 'epilogue'),
-    ]
-
-    group = ResultService._get_run_stats_leaf_group(results, 1)
-
-    assert [result.id for result in group] == [2, 3, 4]
-
-
-def test_stats_leaf_group_rejects_non_aggregate_execution():
-    results = [_result(1, 'vlan_filter'), _result(2, 'vlan_filter')]
-
-    with pytest.raises(ValidationError, match='not an aggregate leaf ID'):
-        ResultService._get_run_stats_leaf_group(results, 1)
-
-
-def test_paginate_queryset_counts_and_slices_querysets(
-    monkeypatch: pytest.MonkeyPatch,
-):
-    queryset = ResultModel.objects.order_by('id')
-    count_calls = []
-
-    def count(_queryset):
-        count_calls.append(True)
-        return 5
-
-    monkeypatch.setattr(type(queryset), 'count', count)
-
-    paginated = PaginatedResult.paginate_queryset(queryset, page=2, page_size=2)
-
-    assert count_calls == [True]
-    assert paginated['pagination'] == {
-        'count': 5,
-        'next': 'page=3',
-        'previous': 'page=1',
+def _stats_node(
+    result_id: int = 51350,
+    node_type: str = 'test',
+    children: list[dict] | None = None,
+) -> dict:
+    return {
+        'result_id': result_id,
+        'exec_seqno': 1759,
+        'parent_id': 49594,
+        'type': node_type,
+        'test_id': 261,
+        'test_name': 'vlan_filter',
+        'period': '1760307704s792-1760307725s503',
+        'path': ['dpdk-ethdev-ts', 'usecases', 'vlan_filter'],
+        'objective': '',
+        'children': children or [],
+        'stats': {
+            'passed': 0,
+            'failed': 0,
+            'passed_unexpected': 0,
+            'failed_unexpected': 12,
+            'skipped': 0,
+            'skipped_unexpected': 0,
+            'abnormal': 0,
+        },
+        'comments': [],
     }
-    assert (
-        paginated['results'].query.low_mark,
-        paginated['results'].query.high_mark,
-    ) == (2, 4)
 
 
-def test_paginate_queryset_keeps_list_results_concrete():
-    paginated = PaginatedResult.paginate_queryset([1, 2, 3], page=2, page_size=2)
-
-    assert paginated['pagination'] == {
-        'count': 3,
-        'next': None,
-        'previous': 'page=1',
+def _service_results(leaf_results: dict) -> dict:
+    rows = copy.deepcopy(leaf_results['results'])
+    for row in rows:
+        row.pop('classification')
+    return {
+        'pagination': copy.deepcopy(leaf_results['pagination']),
+        'results': rows,
     }
-    assert paginated['results'] == [3]
 
 
 class FakeMCP:
@@ -558,20 +527,35 @@ def test_run_leaf_tool_forwards_filters(
     leaf_results: dict,
 ):
     calls = {}
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'get_result',
+        staticmethod(lambda result_id: SimpleNamespace(test_run_id=49591)),
+    )
 
-    def get_run_leaf_results(**kwargs):
-        calls.update(kwargs)
-        return leaf_results
+    def get_run_stats(run_id, requirements):
+        calls['stats'] = (run_id, requirements)
+        return _stats_node()
+
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_stats',
+        staticmethod(get_run_stats),
+    )
+
+    def list_results_paginated(**kwargs):
+        calls['results'] = kwargs
+        return _service_results(leaf_results)
 
     monkeypatch.setattr(
         mcp_tools.ResultService,
-        'get_run_leaf_results',
-        staticmethod(get_run_leaf_results),
+        'list_results_paginated',
+        staticmethod(list_results_paginated),
     )
     mcp = FakeMCP()
     register_tools(mcp)
 
-    asyncio.run(
+    output = asyncio.run(
         mcp.tools['get_run_leaf_results'](
             51350,
             requirements='REQ-1;REQ-2',
@@ -582,27 +566,42 @@ def test_run_leaf_tool_forwards_filters(
         ),
     )
 
-    assert calls == {
-        'leaf_result_id': 51350,
+    assert calls['stats'] == (49591, None)
+    assert calls['results'] == {
+        'parent_id': 49594,
+        'test_name': 'vlan_filter',
+        'start_exec_seqno': 1759,
         'requirements': 'REQ-1;REQ-2',
         'results': 'FAILED',
         'result_properties': 'unexpected',
         'page': 2,
         'page_size': 10,
     }
+    assert '| unexpected |' in output
+    assert '| expected |' in output
 
 
 def test_run_leaf_tool_validates_before_rendering(
     monkeypatch: pytest.MonkeyPatch,
     leaf_results: dict,
 ):
-    malformed_results = copy.deepcopy(leaf_results)
+    malformed_results = _service_results(leaf_results)
     malformed_results['results'][0]['extra'] = True
     renderer_called = False
 
     monkeypatch.setattr(
         mcp_tools.ResultService,
-        'get_run_leaf_results',
+        'get_result',
+        staticmethod(lambda result_id: SimpleNamespace(test_run_id=49591)),
+    )
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_stats',
+        staticmethod(lambda run_id, requirements: _stats_node()),
+    )
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'list_results_paginated',
         staticmethod(lambda **kwargs: malformed_results),
     )
 
@@ -619,3 +618,76 @@ def test_run_leaf_tool_validates_before_rendering(
         asyncio.run(mcp.tools['get_run_leaf_results'](51350))
 
     assert not renderer_called
+
+
+@pytest.mark.parametrize('node_type', ['pkg', 'session'])
+def test_run_leaf_adapter_rejects_package_and_session_nodes(
+    monkeypatch: pytest.MonkeyPatch,
+    node_type: str,
+):
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'get_result',
+        staticmethod(lambda result_id: SimpleNamespace(test_run_id=49591)),
+    )
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_stats',
+        staticmethod(lambda run_id, requirements: _stats_node(node_type=node_type)),
+    )
+
+    with pytest.raises(ValidationError, match='test leaf result ID'):
+        _get_run_leaf_results(51350)
+
+
+def test_run_leaf_adapter_rejects_unknown_result_id(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    def get_result(result_id):
+        msg = f'Result {result_id} not found'
+        raise NotFoundError(msg)
+
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'get_result',
+        staticmethod(get_result),
+    )
+
+    with pytest.raises(NotFoundError, match='Result 99999 not found'):
+        _get_run_leaf_results(99999)
+
+
+def test_run_leaf_adapter_rejects_non_aggregate_execution(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'get_result',
+        staticmethod(lambda result_id: SimpleNamespace(test_run_id=49591)),
+    )
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_stats',
+        staticmethod(lambda run_id, requirements: _stats_node()),
+    )
+
+    with pytest.raises(ValidationError, match='not an aggregate leaf ID'):
+        _get_run_leaf_results(51351)
+
+
+def test_run_leaf_adapter_rejects_unavailable_stats(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'get_result',
+        staticmethod(lambda result_id: SimpleNamespace(test_run_id=49591)),
+    )
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_stats',
+        staticmethod(lambda run_id, requirements: None),
+    )
+
+    with pytest.raises(ValidationError, match='unavailable for run 49591'):
+        _get_run_leaf_results(51350)

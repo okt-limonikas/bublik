@@ -468,7 +468,6 @@ class RunLeafResult(BaseModel):
     requirements: list[str]
     has_error: bool
     has_measurements: bool
-    exec_seqno: int | None
     classification: Literal['expected', 'unexpected']
 
 

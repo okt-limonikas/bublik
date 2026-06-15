@@ -5,9 +5,9 @@ Aggregate leaf: `51350`
 Run: `49591`
 Requirements: `REQ-1;REQ-2`
 
-| Result ID | Exec Seqno | Start | Obtained | Expected | Classification | Verdicts | Artifacts |
-|---:|---:|---|---|---|---|---|---:|
-| 51350 | 1759 | 2025-10-13 01:01:44+00:00 | FAILED | PASSED | unexpected | ["Packet was not received \| timeout"] | 2 |
-| 51351 | 1760 | 2025-10-13 01:01:46+00:00 | PASSED | PASSED | expected | - | 0 |
+| Result ID | Start | Obtained | Expected | Classification | Verdicts | Artifacts |
+|---:|---|---|---|---|---|---:|
+| 51350 | 2025-10-13 01:01:44+00:00 | FAILED | PASSED | unexpected | ["Packet was not received \| timeout"] | 2 |
+| 51351 | 2025-10-13 01:01:46+00:00 | PASSED | PASSED | expected | - | 0 |
 
 *Page 1 | 12 results | previous: - | next: page=2*
