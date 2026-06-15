@@ -369,7 +369,8 @@ class ResultService:
             )
             .distinct()
         )
-        concrete_results = list(queryset)
+        paginated = PaginatedResult.paginate_queryset(queryset, page, page_size)
+        concrete_results = list(paginated['results'])
         details_by_id = {
             detail['result_id']: detail
             for detail in generate_results_details(concrete_results)
@@ -383,7 +384,7 @@ class ResultService:
             )
             result_rows.append(detail)
 
-        paginated = PaginatedResult.paginate_queryset(result_rows, page, page_size)
+        paginated['results'] = result_rows
         return {
             'leaf': {
                 'result_id': leaf.id,

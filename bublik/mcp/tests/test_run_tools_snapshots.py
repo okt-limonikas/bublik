@@ -14,8 +14,10 @@ from typing import TYPE_CHECKING
 import pytest
 from rest_framework.exceptions import ValidationError
 
+from bublik.core.pagination_helpers import PaginatedResult
 from bublik.core.result.services import ResultService
 from bublik.data.models import ResultType
+from bublik.data.models import TestIterationResult as ResultModel
 from bublik.mcp import tools as mcp_tools
 from bublik.mcp.run_markdown import render_run_leaf_results, render_run_overview
 from bublik.mcp.tools import register_tools
@@ -244,6 +246,43 @@ def test_stats_leaf_group_rejects_non_aggregate_execution():
 
     with pytest.raises(ValidationError, match='not an aggregate leaf ID'):
         ResultService._get_run_stats_leaf_group(results, 1)
+
+
+def test_paginate_queryset_counts_and_slices_querysets(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    queryset = ResultModel.objects.order_by('id')
+    count_calls = []
+
+    def count(_queryset):
+        count_calls.append(True)
+        return 5
+
+    monkeypatch.setattr(type(queryset), 'count', count)
+
+    paginated = PaginatedResult.paginate_queryset(queryset, page=2, page_size=2)
+
+    assert count_calls == [True]
+    assert paginated['pagination'] == {
+        'count': 5,
+        'next': 'page=3',
+        'previous': 'page=1',
+    }
+    assert (
+        paginated['results'].query.low_mark,
+        paginated['results'].query.high_mark,
+    ) == (2, 4)
+
+
+def test_paginate_queryset_keeps_list_results_concrete():
+    paginated = PaginatedResult.paginate_queryset([1, 2, 3], page=2, page_size=2)
+
+    assert paginated['pagination'] == {
+        'count': 3,
+        'next': None,
+        'previous': 'page=1',
+    }
+    assert paginated['results'] == [3]
 
 
 class FakeMCP:

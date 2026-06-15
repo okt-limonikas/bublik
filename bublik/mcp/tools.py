@@ -79,6 +79,7 @@ def register_tools(mcp: FastMCP):  # noqa: C901
                 RunService.get_run_stats(run_id, requirements),
             ),
         )()
+
         return render_run_overview(
             details,
             source,
