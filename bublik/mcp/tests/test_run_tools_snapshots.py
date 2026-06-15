@@ -5,12 +5,13 @@ from __future__ import annotations
 
 import asyncio
 import copy
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError as PydanticValidationError
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -19,6 +20,7 @@ from bublik.core.result.services import ResultService
 from bublik.data.models import ResultType
 from bublik.data.models import TestIterationResult as ResultModel
 from bublik.mcp import tools as mcp_tools
+from bublik.mcp.models import RunLeafResultsPayload, RunOverviewPayload
 from bublik.mcp.run_markdown import render_run_leaf_results, render_run_overview
 from bublik.mcp.tools import register_tools
 
@@ -44,7 +46,7 @@ def run_details() -> dict:
         'project_name': 'DPDK',
         'start': datetime(2025, 10, 13, 0, 12, tzinfo=timezone.utc),
         'finish': datetime(2025, 10, 13, 2, 42, tzinfo=timezone.utc),
-        'duration': '2:30:00',
+        'duration': timedelta(hours=2, minutes=30),
         'main_package': 'dpdk-ethdev-ts',
         'status': 'DONE',
         'status_by_nok': 'error',
@@ -58,11 +60,17 @@ def run_details() -> dict:
         'conclusion_reason': 'Run marked as compromised',
         'important_tags': ['nightly', 'x86_64'],
         'relevant_tags': ['dpdk-24.11'],
-        'branches': [{'name': 'main', 'value': 'main'}],
-        'revisions': [{'name': 'dpdk', 'value': 'abc123'}],
+        'branches': ['main: main'],
+        'revisions': [
+            {
+                'name': 'dpdk',
+                'value': 'abc123',
+                'url': 'https://git.example/dpdk/commit/abc123',
+            },
+        ],
         'labels': ['performance'],
         'special_categories': {'NIC': ['mlx5']},
-        'configuration': {'name': 'host', 'value': 'lab-01'},
+        'configuration': 'host: lab-01',
     }
 
 
@@ -83,28 +91,60 @@ def leaf_results() -> dict:
         },
         'results': [
             {
+                'name': 'vlan_filter',
                 'result_id': 51350,
+                'run_id': 49591,
+                'project_id': 7,
+                'project_name': 'DPDK',
+                'iteration_id': 9001,
                 'exec_seqno': 1759,
                 'start': datetime(2025, 10, 13, 1, 1, 44, tzinfo=timezone.utc),
                 'obtained_result': {
                     'result_type': 'FAILED',
                     'verdicts': ['Packet was not received | timeout'],
                 },
-                'expected_results': [{'result_type': 'PASSED'}],
+                'expected_results': [
+                    {
+                        'result_type': 'PASSED',
+                        'verdicts': [],
+                        'keys': [],
+                    },
+                ],
                 'classification': 'unexpected',
                 'artifacts': ['packet.pcap', 'tester.log'],
+                'parameters': ['vlan: 42'],
+                'comments': [],
+                'requirements': ['REQ-1', 'REQ-2'],
+                'has_error': True,
+                'has_measurements': False,
             },
             {
+                'name': 'vlan_filter',
                 'result_id': 51351,
+                'run_id': 49591,
+                'project_id': 7,
+                'project_name': 'DPDK',
+                'iteration_id': 9002,
                 'exec_seqno': 1760,
                 'start': datetime(2025, 10, 13, 1, 1, 46, tzinfo=timezone.utc),
                 'obtained_result': {
                     'result_type': 'PASSED',
                     'verdicts': [],
                 },
-                'expected_results': [{'result_type': 'PASSED'}],
+                'expected_results': [
+                    {
+                        'result_type': 'PASSED',
+                        'verdicts': [],
+                        'keys': [],
+                    },
+                ],
                 'classification': 'expected',
                 'artifacts': [],
+                'parameters': [],
+                'comments': [],
+                'requirements': ['REQ-1', 'REQ-2'],
+                'has_error': False,
+                'has_measurements': False,
             },
         ],
     }
@@ -116,9 +156,13 @@ def test_run_overview_markdown(
     snapshot_md: SnapshotAssertion,
 ):
     output = render_run_overview(
-        run_details,
-        'https://logs.example/run-49591',
-        run_stats,
+        RunOverviewPayload.model_validate(
+            {
+                'details': run_details,
+                'source': 'https://logs.example/run-49591',
+                'stats': run_stats,
+            },
+        ),
         'REQ-1;REQ-2',
     )
     assert output == snapshot_md
@@ -130,9 +174,13 @@ def test_run_overview_unexpected_leaves_markdown(
     snapshot_md: SnapshotAssertion,
 ):
     output = render_run_overview(
-        run_details,
-        'https://logs.example/run-49591',
-        run_stats,
+        RunOverviewPayload.model_validate(
+            {
+                'details': run_details,
+                'source': 'https://logs.example/run-49591',
+                'stats': run_stats,
+            },
+        ),
         'REQ-1;REQ-2',
         unexpected_only=True,
     )
@@ -152,9 +200,13 @@ def test_run_overview_empty_unexpected_leaves_markdown(
         node['stats']['abnormal'] = 0
 
     output = render_run_overview(
-        run_details,
-        'https://logs.example/run-49591',
-        stats,
+        RunOverviewPayload.model_validate(
+            {
+                'details': run_details,
+                'source': 'https://logs.example/run-49591',
+                'stats': stats,
+            },
+        ),
         None,
         unexpected_only=True,
     )
@@ -176,9 +228,13 @@ def test_run_overview_includes_abnormal_only_leaf(
     leaf['stats']['abnormal'] = 1
 
     output = render_run_overview(
-        run_details,
-        None,
-        stats,
+        RunOverviewPayload.model_validate(
+            {
+                'details': run_details,
+                'source': None,
+                'stats': stats,
+            },
+        ),
         None,
         unexpected_only=True,
     )
@@ -192,22 +248,88 @@ def test_run_overview_renders_comments_in_statistics_row(
 ):
     stats = copy.deepcopy(run_stats)
     stats['comments'] = [
-        {'comment': 'First | comment'},
-        {'comment': 'Second comment'},
+        {
+            'comment_id': '1',
+            'updated': '2025-10-13T01:00:00Z',
+            'serial': '1',
+            'comment': 'First | comment',
+        },
+        {
+            'comment_id': '2',
+            'updated': '2025-10-13T01:01:00Z',
+            'serial': '2',
+            'comment': 'Second comment',
+        },
     ]
 
-    output = render_run_overview(run_details, None, stats, None)
+    payload = RunOverviewPayload.model_validate(
+        {'details': run_details, 'source': None, 'stats': stats},
+    )
+    output = render_run_overview(payload, None)
 
     root_row = next(line for line in output.splitlines() if line.startswith('| 49592 |'))
     assert 'First \\| comment<br>Second comment' in root_row
     assert '## Objectives and Comments' not in output
 
 
+def test_run_overview_payload_accepts_nullable_source_and_stats(run_details: dict):
+    payload = RunOverviewPayload.model_validate(
+        {
+            'details': run_details,
+            'source': None,
+            'stats': None,
+        },
+    )
+
+    assert payload.source is None
+    assert payload.stats is None
+
+
+@pytest.mark.parametrize(
+    ('mutate', 'error_path'),
+    [
+        (lambda payload: payload.update({'extra': True}), 'extra'),
+        (lambda payload: payload['details'].pop('project_id'), 'details.project_id'),
+        (
+            lambda payload: payload['stats']['stats'].update({'failed': -1}),
+            'stats.stats.failed',
+        ),
+        (
+            lambda payload: payload['stats'].update({'type': 'unknown'}),
+            'stats.type',
+        ),
+        (
+            lambda payload: payload['stats']['children'][0].update({'extra': True}),
+            'stats.children.0.extra',
+        ),
+    ],
+)
+def test_run_overview_payload_rejects_invalid_data(
+    run_details: dict,
+    run_stats: dict,
+    mutate,
+    error_path: str,
+):
+    raw_payload = {
+        'details': copy.deepcopy(run_details),
+        'source': None,
+        'stats': copy.deepcopy(run_stats),
+    }
+    mutate(raw_payload)
+
+    with pytest.raises(PydanticValidationError) as error:
+        RunOverviewPayload.model_validate(raw_payload)
+
+    rendered_errors = '.'.join(str(item) for item in error.value.errors()[0]['loc'])
+    assert rendered_errors == error_path
+
+
 def test_run_leaf_results_markdown(
     leaf_results: dict,
     snapshot_md: SnapshotAssertion,
 ):
-    assert render_run_leaf_results(leaf_results) == snapshot_md
+    payload = RunLeafResultsPayload.model_validate(leaf_results)
+    assert render_run_leaf_results(payload) == snapshot_md
 
 
 def test_empty_run_leaf_results_markdown(
@@ -216,7 +338,44 @@ def test_empty_run_leaf_results_markdown(
 ):
     leaf_results['pagination'] = {'count': 0, 'next': None, 'previous': None}
     leaf_results['results'] = []
-    assert render_run_leaf_results(leaf_results) == snapshot_md
+    payload = RunLeafResultsPayload.model_validate(leaf_results)
+    assert render_run_leaf_results(payload) == snapshot_md
+
+
+@pytest.mark.parametrize(
+    ('mutate', 'error_path'),
+    [
+        (lambda payload: payload.update({'extra': True}), 'extra'),
+        (lambda payload: payload['pagination'].update({'count': -1}), 'pagination.count'),
+        (
+            lambda payload: payload['results'][0].update({'classification': 'unknown'}),
+            'results.0.classification',
+        ),
+        (
+            lambda payload: payload['results'][0]['obtained_result'].update(
+                {'extra': True},
+            ),
+            'results.0.obtained_result.extra',
+        ),
+        (
+            lambda payload: payload['results'][0].pop('project_id'),
+            'results.0.project_id',
+        ),
+    ],
+)
+def test_run_leaf_payload_rejects_invalid_data(
+    leaf_results: dict,
+    mutate,
+    error_path: str,
+):
+    raw_payload = copy.deepcopy(leaf_results)
+    mutate(raw_payload)
+
+    with pytest.raises(PydanticValidationError) as error:
+        RunLeafResultsPayload.model_validate(raw_payload)
+
+    rendered_errors = '.'.join(str(item) for item in error.value.errors()[0]['loc'])
+    assert rendered_errors == error_path
 
 
 def _result(result_id: int, name: str, result_type: str = ResultType.TEST):
@@ -355,6 +514,45 @@ def test_run_overview_tool_forwards_requirements(
     assert '| 49592 | package |' not in output
 
 
+def test_run_overview_tool_validates_before_rendering(
+    monkeypatch: pytest.MonkeyPatch,
+    run_details: dict,
+    run_stats: dict,
+):
+    malformed_details = {**run_details, 'unexpected_field': True}
+    renderer_called = False
+
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_details',
+        staticmethod(lambda run_id: malformed_details),
+    )
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_source',
+        staticmethod(lambda run_id: None),
+    )
+    monkeypatch.setattr(
+        mcp_tools.RunService,
+        'get_run_stats',
+        staticmethod(lambda run_id, requirements: run_stats),
+    )
+
+    def render(*args, **kwargs):
+        nonlocal renderer_called
+        renderer_called = True
+        return ''
+
+    monkeypatch.setattr(mcp_tools, 'render_run_overview', render)
+    mcp = FakeMCP()
+    register_tools(mcp)
+
+    with pytest.raises(PydanticValidationError, match='unexpected_field'):
+        asyncio.run(mcp.tools['get_run_overview'](49591))
+
+    assert not renderer_called
+
+
 def test_run_leaf_tool_forwards_filters(
     monkeypatch: pytest.MonkeyPatch,
     leaf_results: dict,
@@ -392,3 +590,32 @@ def test_run_leaf_tool_forwards_filters(
         'page': 2,
         'page_size': 10,
     }
+
+
+def test_run_leaf_tool_validates_before_rendering(
+    monkeypatch: pytest.MonkeyPatch,
+    leaf_results: dict,
+):
+    malformed_results = copy.deepcopy(leaf_results)
+    malformed_results['results'][0]['extra'] = True
+    renderer_called = False
+
+    monkeypatch.setattr(
+        mcp_tools.ResultService,
+        'get_run_leaf_results',
+        staticmethod(lambda **kwargs: malformed_results),
+    )
+
+    def render(*args, **kwargs):
+        nonlocal renderer_called
+        renderer_called = True
+        return ''
+
+    monkeypatch.setattr(mcp_tools, 'render_run_leaf_results', render)
+    mcp = FakeMCP()
+    register_tools(mcp)
+
+    with pytest.raises(PydanticValidationError, match='extra'):
+        asyncio.run(mcp.tools['get_run_leaf_results'](51350))
+
+    assert not renderer_called

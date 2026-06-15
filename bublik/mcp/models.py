@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from datetime import datetime, timedelta  # noqa: TC003
 from enum import Enum
 from itertools import groupby
 from typing import Any, Literal
@@ -288,6 +289,196 @@ class JsonLog(BaseModel):
 
     version: Version = Field(..., description='Version of the API used')
     root: list[LogPageBlock] = Field(..., description='Root entry for all block')
+
+
+# ============================================================================
+# Run Tool Models
+# ============================================================================
+
+
+class RunCompromisedDetails(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    status: bool
+    comment: str | None = None
+    bug_id: str | None = None
+    bug_url: str | None = None
+
+
+class RunRevision(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    name: str
+    value: str
+    url: str
+
+
+class RunDetails(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    project_id: int
+    project_name: str
+    id: int
+    start: datetime
+    finish: datetime | None
+    duration: timedelta | None
+    main_package: str | None
+    status: str | None
+    status_by_nok: str
+    compromised: RunCompromisedDetails
+    conclusion: str
+    conclusion_reason: str | None
+    important_tags: list[str]
+    relevant_tags: list[str]
+    branches: list[str]
+    revisions: list[RunRevision]
+    labels: list[str]
+    special_categories: dict[str, list[str]]
+    configuration: str | None
+
+
+class RunStatsCounters(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    passed: int = Field(ge=0)
+    failed: int = Field(ge=0)
+    passed_unexpected: int = Field(ge=0)
+    failed_unexpected: int = Field(ge=0)
+    skipped: int = Field(ge=0)
+    skipped_unexpected: int = Field(ge=0)
+    abnormal: int = Field(ge=0)
+
+    @property
+    def total(self) -> int:
+        return sum(
+            (
+                self.passed,
+                self.failed,
+                self.passed_unexpected,
+                self.failed_unexpected,
+                self.skipped,
+                self.skipped_unexpected,
+                self.abnormal,
+            ),
+        )
+
+    @property
+    def unexpected(self) -> int:
+        return sum(
+            (
+                self.passed_unexpected,
+                self.failed_unexpected,
+                self.skipped_unexpected,
+                self.abnormal,
+            ),
+        )
+
+
+class RunStatsComment(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    comment_id: str
+    updated: str
+    serial: str
+    comment: Any
+
+
+class RunStatsNode(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    result_id: int
+    exec_seqno: int | None
+    parent_id: int | None
+    type: Literal['pkg', 'session', 'test']
+    test_id: int
+    test_name: str
+    period: str
+    path: list[str]
+    objective: str
+    children: list[RunStatsNode]
+    stats: RunStatsCounters
+    comments: list[RunStatsComment]
+
+
+RunStatsNode.model_rebuild()
+
+
+class RunOverviewPayload(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    details: RunDetails
+    source: str | None
+    stats: RunStatsNode | None
+
+
+class RunLeafIdentity(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    result_id: int
+    run_id: int
+    test_name: str
+    path: list[str]
+
+
+class RunLeafPagination(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    count: int = Field(ge=0)
+    next: str | None
+    previous: str | None
+
+
+class RunExpectedKey(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    name: str
+    url: str | None
+
+
+class RunExpectedResult(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    result_type: str
+    verdicts: list[str]
+    keys: list[RunExpectedKey]
+
+
+class RunObtainedResult(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    result_type: str | None
+    verdicts: list[str]
+
+
+class RunLeafResult(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    name: str
+    result_id: int
+    run_id: int
+    project_id: int
+    project_name: str
+    iteration_id: int
+    start: datetime
+    obtained_result: RunObtainedResult
+    expected_results: list[RunExpectedResult]
+    artifacts: list[str]
+    parameters: list[str]
+    comments: list[str]
+    requirements: list[str]
+    has_error: bool
+    has_measurements: bool
+    exec_seqno: int | None
+    classification: Literal['expected', 'unexpected']
+
+
+class RunLeafResultsPayload(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    leaf: RunLeafIdentity
+    requirements: str | None
+    pagination: RunLeafPagination
+    results: list[RunLeafResult]
 
 
 # ============================================================================

@@ -20,10 +20,10 @@
 | Compromised bug | https://bugs.example/BUG-42 |
 | Important tags | ["nightly", "x86_64"] |
 | Relevant tags | ["dpdk-24.11"] |
-| Branches | [{"name": "main", "value": "main"}] |
-| Revisions | [{"name": "dpdk", "value": "abc123"}] |
+| Branches | ["main: main"] |
+| Revisions | [{"name": "dpdk", "url": "https://git.example/dpdk/commit/abc123", "value": "abc123"}] |
 | Labels | ["performance"] |
-| Configuration | {"name": "host", "value": "lab-01"} |
+| Configuration | host: lab-01 |
 | Special categories | {"NIC": ["mlx5"]} |
 
 ## Result Statistics

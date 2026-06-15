@@ -4,7 +4,18 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+from pydantic import BaseModel
+
+
+if TYPE_CHECKING:
+    from bublik.mcp.models import (
+        RunLeafResultsPayload,
+        RunOverviewPayload,
+        RunStatsComment,
+        RunStatsNode,
+    )
 
 
 def _cell(value: Any) -> str:
@@ -14,78 +25,70 @@ def _cell(value: Any) -> str:
         return '-'
     if isinstance(value, bool):
         return 'Yes' if value else 'No'
+    if isinstance(value, BaseModel):
+        value = value.model_dump(mode='json')
     if isinstance(value, (dict, list, tuple)):
-        value = json.dumps(value, default=str, ensure_ascii=True, sort_keys=True)
+        value = json.dumps(
+            value,
+            default=lambda item: (
+                item.model_dump(mode='json') if isinstance(item, BaseModel) else str(item)
+            ),
+            ensure_ascii=True,
+            sort_keys=True,
+        )
     return str(value).replace('|', '\\|').replace('\n', '<br>')
 
 
-def _flatten_stats(node: dict | None) -> list[dict]:
+def _flatten_stats(node: RunStatsNode | None) -> list[RunStatsNode]:
     if not node:
         return []
     descendants = (
         item
-        for child in node.get('children', [])
+        for child in node.children
         for item in _flatten_stats(child)
     )
     return [node, *descendants]
 
 
-def _comments_text(comments: list) -> str:
-    values = [
-        comment.get('comment', comment) if isinstance(comment, dict) else comment
-        for comment in comments
-    ]
+def _comments_text(comments: list[RunStatsComment]) -> str:
+    values = [comment.comment for comment in comments]
     return '<br>'.join(str(value) for value in values) if values else '-'
 
 
-def _unexpected_count(node: dict) -> int:
-    node_stats = node.get('stats', {})
-    return sum(
-        node_stats.get(name, 0)
-        for name in (
-            'passed_unexpected',
-            'failed_unexpected',
-            'skipped_unexpected',
-            'abnormal',
-        )
-    )
-
-
 def render_run_overview(
-    details: dict,
-    source: str | None,
-    stats: dict | None,
+    payload: RunOverviewPayload,
     requirements: str | None,
     unexpected_only: bool = False,
 ) -> str:
-    compromised = details.get('compromised') or {'status': False}
+    details = payload.details
+    compromised = details.compromised
     rows = [
-        ('Run ID', details.get('id')),
-        ('Project', details.get('project_name')),
-        ('Status', details.get('status')),
-        ('Status by NOK', details.get('status_by_nok')),
-        ('Conclusion', details.get('conclusion')),
-        ('Conclusion reason', details.get('conclusion_reason')),
-        ('Start', details.get('start')),
-        ('Finish', details.get('finish')),
-        ('Duration', details.get('duration')),
-        ('Main package', details.get('main_package')),
-        ('Source', source),
+        ('Run ID', details.id),
+        ('Project', details.project_name),
+        ('Status', details.status),
+        ('Status by NOK', details.status_by_nok),
+        ('Conclusion', details.conclusion),
+        ('Conclusion reason', details.conclusion_reason),
+        ('Start', details.start),
+        ('Finish', details.finish),
+        ('Duration', details.duration),
+        ('Main package', details.main_package),
+        ('Source', payload.source),
         ('Requirements', requirements or 'none'),
         ('Result view', 'unexpected leaves' if unexpected_only else 'all results'),
-        ('Compromised', compromised.get('status', False)),
-        ('Compromised comment', compromised.get('comment')),
-        ('Compromised bug', compromised.get('bug_url') or compromised.get('bug_id')),
-        ('Important tags', details.get('important_tags')),
-        ('Relevant tags', details.get('relevant_tags')),
-        ('Branches', details.get('branches')),
-        ('Revisions', details.get('revisions')),
-        ('Labels', details.get('labels')),
-        ('Configuration', details.get('configuration')),
-        ('Special categories', details.get('special_categories')),
+        ('Compromised', compromised.status),
+        ('Compromised comment', compromised.comment),
+        ('Compromised bug', compromised.bug_url or compromised.bug_id),
+        ('Important tags', details.important_tags),
+        ('Relevant tags', details.relevant_tags),
+        ('Branches', details.branches),
+        ('Revisions', details.revisions),
+        ('Labels', details.labels),
+        ('Configuration', details.configuration),
+        ('Special categories', details.special_categories),
     ]
     lines = [
-        f'# Run {_cell(details.get("id"))} Overview',
+        f'# Run {_cell(details.id)} Overview',
         '',
         '| Field | Value |',
         '|---|---|',
@@ -100,41 +103,39 @@ def render_run_overview(
         '|---:|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|',
     ]
 
-    stat_nodes = _flatten_stats(stats)
+    stat_nodes = _flatten_stats(payload.stats)
     if unexpected_only:
         stat_nodes = [
             node
             for node in stat_nodes
-            if not node.get('children') and _unexpected_count(node) > 0
+            if not node.children and node.stats.unexpected > 0
         ]
 
     for node in stat_nodes:
-        node_stats = node.get('stats', {})
-        total = sum(node_stats.values())
-        nok = _unexpected_count(node)
+        node_stats = node.stats
         result_type = {'pkg': 'package', 'session': 'session', 'test': 'test'}.get(
-            node.get('type'),
-            node.get('type'),
+            node.type,
+            node.type,
         )
         lines.append(
             '| {result_id} | {result_type} | {path} | {objective} | {comments} | '
             '{passed} | {failed} | '
             '{passed_nok} | {failed_nok} | {skipped} | {skipped_nok} | '
             '{abnormal} | {total} | {nok} |'.format(
-                result_id=_cell(node.get('result_id')),
+                result_id=_cell(node.result_id),
                 result_type=_cell(result_type),
-                path=_cell(' / '.join(node.get('path', []))),
-                objective=_cell(node.get('objective')),
-                comments=_cell(_comments_text(node.get('comments', []))),
-                passed=node_stats.get('passed', 0),
-                failed=node_stats.get('failed', 0),
-                passed_nok=node_stats.get('passed_unexpected', 0),
-                failed_nok=node_stats.get('failed_unexpected', 0),
-                skipped=node_stats.get('skipped', 0),
-                skipped_nok=node_stats.get('skipped_unexpected', 0),
-                abnormal=node_stats.get('abnormal', 0),
-                total=total,
-                nok=nok,
+                path=_cell(' / '.join(node.path)),
+                objective=_cell(node.objective),
+                comments=_cell(_comments_text(node.comments)),
+                passed=node_stats.passed,
+                failed=node_stats.failed,
+                passed_nok=node_stats.passed_unexpected,
+                failed_nok=node_stats.failed_unexpected,
+                skipped=node_stats.skipped,
+                skipped_nok=node_stats.skipped_unexpected,
+                abnormal=node_stats.abnormal,
+                total=node_stats.total,
+                nok=node_stats.unexpected,
             ),
         )
 
@@ -160,21 +161,21 @@ def render_run_overview(
     return '\n'.join(lines)
 
 
-def _expected_result_text(expected_results: list[dict]) -> str:
-    values = [item.get('result_type') for item in expected_results if item.get('result_type')]
+def _expected_result_text(expected_results) -> str:
+    values = [item.result_type for item in expected_results if item.result_type]
     return ', '.join(values) if values else '-'
 
 
-def render_run_leaf_results(data: dict) -> str:
-    leaf = data['leaf']
-    pagination = data['pagination']
+def render_run_leaf_results(payload: RunLeafResultsPayload) -> str:
+    leaf = payload.leaf
+    pagination = payload.pagination
     lines = [
-        f'# Leaf Results: {_cell(leaf.get("test_name"))}',
+        f'# Leaf Results: {_cell(leaf.test_name)}',
         '',
-        f'Path: `{_cell(" / ".join(leaf.get("path", [])))}`',
-        f'Aggregate leaf: `{_cell(leaf.get("result_id"))}`',
-        f'Run: `{_cell(leaf.get("run_id"))}`',
-        f'Requirements: `{_cell(data.get("requirements") or "none")}`',
+        f'Path: `{_cell(" / ".join(leaf.path))}`',
+        f'Aggregate leaf: `{_cell(leaf.result_id)}`',
+        f'Run: `{_cell(leaf.run_id)}`',
+        f'Requirements: `{_cell(payload.requirements or "none")}`',
         '',
         (
             '| Result ID | Exec Seqno | Start | Obtained | Expected | Classification | '
@@ -182,29 +183,29 @@ def render_run_leaf_results(data: dict) -> str:
         ),
         '|---:|---:|---|---|---|---|---|---:|',
     ]
-    for result in data['results']:
-        obtained = result.get('obtained_result') or {}
+    for result in payload.results:
+        obtained = result.obtained_result
         lines.append(
-            f'| {_cell(result.get("result_id"))} | {_cell(result.get("exec_seqno"))} | '
-            f'{_cell(result.get("start"))} | {_cell(obtained.get("result_type"))} | '
-            f'{_cell(_expected_result_text(result.get("expected_results", [])))} | '
-            f'{_cell(result.get("classification"))} | '
-            f'{_cell(obtained.get("verdicts", []))} | '
-            f'{len(result.get("artifacts", []))} |',
+            f'| {_cell(result.result_id)} | {_cell(result.exec_seqno)} | '
+            f'{_cell(result.start)} | {_cell(obtained.result_type)} | '
+            f'{_cell(_expected_result_text(result.expected_results))} | '
+            f'{_cell(result.classification)} | '
+            f'{_cell(obtained.verdicts)} | '
+            f'{len(result.artifacts)} |',
         )
-    if not data['results']:
+    if not payload.results:
         lines.append('| - | - | - | - | - | - | - | 0 |')
 
     page = 1
-    if pagination.get('previous'):
-        page = int(pagination['previous'].split('=')[1]) + 1
+    if pagination.previous:
+        page = int(pagination.previous.split('=')[1]) + 1
     lines.extend(
         [
             '',
             (
-                f'*Page {page} | {pagination["count"]} results | '
-                f'previous: {pagination.get("previous") or "-"} | '
-                f'next: {pagination.get("next") or "-"}*'
+                f'*Page {page} | {pagination.count} results | '
+                f'previous: {pagination.previous or "-"} | '
+                f'next: {pagination.next or "-"}*'
             ),
         ],
     )

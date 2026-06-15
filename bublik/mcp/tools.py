@@ -19,7 +19,7 @@ from bublik.core.run.services import RunService
 from bublik.core.run.stats import generate_runs_details, get_test_runs
 from bublik.core.server import ServerService
 from bublik.core.tree.services import TreeService
-from bublik.mcp.models import JsonLog
+from bublik.mcp.models import JsonLog, RunLeafResultsPayload, RunOverviewPayload
 from bublik.mcp.processor import LogProcessor
 from bublik.mcp.run_markdown import render_run_leaf_results, render_run_overview
 
@@ -80,10 +80,15 @@ def register_tools(mcp: FastMCP):  # noqa: C901
             ),
         )()
 
+        payload = RunOverviewPayload.model_validate(
+            {
+                'details': details,
+                'source': source,
+                'stats': stats,
+            },
+        )
         return render_run_overview(
-            details,
-            source,
-            stats,
+            payload,
             requirements,
             unexpected_only,
         )
@@ -125,7 +130,8 @@ def register_tools(mcp: FastMCP):  # noqa: C901
             page=page,
             page_size=page_size,
         )
-        return render_run_leaf_results(data)
+        payload = RunLeafResultsPayload.model_validate(data)
+        return render_run_leaf_results(payload)
 
     @mcp.tool()
     async def get_result_details(result_id: int) -> dict:
