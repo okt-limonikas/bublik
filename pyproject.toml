@@ -80,6 +80,11 @@ select = [
 ignore = [
     # overwriting some variables (seems to be usefull in some cases)
     'PLW2901',
+    # Ruff formatter handles trailing commas.
+    'COM812',
+    # Ruff formatter handles multiline string and docstring quotes.
+    'Q001',
+    'Q002',
 ]
 exclude = [
     '.env',
@@ -138,8 +143,8 @@ exclude = [
 [tool.ruff.lint.flake8-quotes]
 avoid-escape = false
 inline-quotes = 'single'
-docstring-quotes = 'single'
-multiline-quotes = 'single'
+docstring-quotes = 'double'
+multiline-quotes = 'double'
 
 [tool.ruff.lint.mccabe]
 max-complexity = 16
@@ -155,7 +160,5 @@ max-branches = 30
 max-statements = 100
 max-returns = 7
 
-[tool.black]
-line-length = 96
-target-version = ['py38']
-skip-string-normalization = true
+[tool.ruff.format]
+quote-style = 'single'
