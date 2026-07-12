@@ -1,17 +1,29 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (C) 2016-2023 OKTET Labs Ltd. All rights reserved.
 from collections import OrderedDict
+from dataclasses import asdict
 import json
 
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import BooleanField, Case, Exists, F, OuterRef, Q, Value, When
+from django.db.models import (
+    BooleanField,
+    Case,
+    Exists,
+    F,
+    OuterRef,
+    Prefetch,
+    Q,
+    Value,
+    When,
+    prefetch_related_objects,
+)
 from django.db.models.functions import Concat
 
 from bublik.core.cache import RunCache
-from bublik.core.classification import SUPPRESSION_FILTER, suppressed_subquery
+from bublik.core.classification import build_rule_result_info, suppressed_subquery
 from bublik.core.config.services import ConfigServices
 from bublik.core.datetime_formatting import (
     period_to_str,
@@ -44,6 +56,7 @@ from bublik.data.models import (
     MetaResult,
     MetaTest,
     ResultType,
+    RuleResult,
     RunConclusion,
     RunStatusByUnexpected,
     TestIterationResult,
@@ -568,6 +581,14 @@ def get_nok_results_distribution(run):
 
 def generate_results_details(test_results):
     test_results = list(test_results)
+    # Classifications stamped on the results, loaded for all of them at once.
+    prefetch_related_objects(
+        test_results,
+        Prefetch(
+            'rule_results',
+            queryset=RuleResult.objects.select_related('issue_rule__issue'),
+        ),
+    )
     test_ids = {tr.iteration.test_id for tr in test_results if tr.iteration}
     test_paths = build_test_paths(test_ids)
 
@@ -619,6 +640,13 @@ def generate_results_details(test_results):
         parameters = OrderedDict(sorted(parameters.items()))
         parameters_list = key_value_dict_transforming(parameters)
 
+        # Classifications stamped on this result: needed both to list them for
+        # display and to compute effective_expected (suppressed by an expected
+        # rule on an open issue).
+        rule_results = list(test_result.rule_results.all())
+        issues = [asdict(build_rule_result_info(rr)) for rr in rule_results]
+        effective_expected = any(rr.is_suppressing for rr in rule_results)
+
         data = {
             'name': iteration.test.name if iteration else None,
             'path': test_paths.get(iteration.test_id, '') if iteration else None,
@@ -634,11 +662,10 @@ def generate_results_details(test_results):
             'parameters': parameters_list,
             'comments': comments,
             'requirements': requirements,
-            # An error is not unexpected when an expected rule on an open issue
-            # suppresses it.
-            'has_error': has_err
-            and not test_result.rule_results.filter(**SUPPRESSION_FILTER).exists(),
+            'has_error': has_err and not effective_expected,
             'has_measurements': exist_measurement_results(test_result),
+            'issues': issues,
+            'effective_expected': effective_expected,
         }
 
         results_details.append(data)
