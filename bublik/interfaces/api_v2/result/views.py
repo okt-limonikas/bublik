@@ -3,16 +3,39 @@
 
 from typing import ClassVar
 
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from bublik.core.auth import check_action_permission_for_projects, get_user_by_access_token
+from bublik.core.cache import RunCache
 from bublik.core.result import ResultService
+from bublik.core.run.classification import ClassificationService
+from bublik.core.run.data import get_tags_by_runs
 from bublik.core.run.stats import (
     generate_results_details,
 )
-from bublik.data.serializers import TestIterationResultSerializer
+from bublik.data.models import (
+    Issue,
+    IssueRule,
+    RuleResult,
+    RuleResultOrigin,
+)
+from bublik.data.serializers import (
+    IssueRuleSerializer,
+    IssueSerializer,
+    TestIterationResultSerializer,
+)
 from bublik.interfaces.api_v2.result.schemas import result_viewset_schema
+from bublik.interfaces.api_v2.result.serializers import (
+    ClassifyRequestSerializer,
+    ClassifyResponseSerializer,
+)
 
 
 __all__ = [
@@ -57,3 +80,106 @@ class ResultViewSet(ModelViewSet):
     @action(detail=True, methods=['get'])
     def measurements(self, request, pk=None):
         return Response(ResultService.get_result_measurements(pk))
+
+    @action(detail=True, methods=['post'], serializer_class=ClassifyRequestSerializer)
+    def classify(self, request, pk=None):
+        result = ResultService.get_result(pk)
+        check_action_permission_for_projects(request, 'manage_issues', [result.project_id])
+        if result.iteration_id is None or result.test_run_id is None:
+            msg = 'Only results of tests can be classified.'
+            raise ValidationError({'result': msg})
+        actor = get_user_by_access_token(request.COOKIES.get('access_token'))
+
+        body_serializer = self.get_serializer(data=request.data)
+        body_serializer.is_valid(raise_exception=True)
+        body = body_serializer.validated_data
+
+        with transaction.atomic():
+            issue = self._resolve_issue(body.get('issue'), result, actor)
+
+            category = body['category']
+            active = body['scope'] == 'future'
+            origin = (
+                RuleResultOrigin.MANUAL_PERSISTENT if active else RuleResultOrigin.MANUAL_ONEOFF
+            )
+
+            matcher = body.get('matcher') or {}
+            rule_data = {
+                'issue': issue.id,
+                'test': result.iteration.test_id,
+                'category': category,
+                'parameters': matcher.get(
+                    'parameters',
+                    ClassificationService.result_param_dict(result),
+                ),
+                'verdicts': sorted(
+                    matcher.get('verdicts', ClassificationService.result_verdict_set(result)),
+                ),
+                'tags': sorted(matcher.get('tags', self._capture_tags(result))),
+            }
+            if 'expected' in body:
+                rule_data['expected'] = body['expected']
+
+            rule_serializer = IssueRuleSerializer(data=rule_data)
+            rule_serializer.is_valid(raise_exception=True)
+
+            # Repeating a classification reuses the identical rule (same
+            # matcher, category, disposition and active state) instead of
+            # piling up copies; the result just gets one more stamp on it.
+            fields = rule_serializer.validated_data
+            rule = (
+                IssueRule.objects.filter(
+                    issue=fields['issue'],
+                    test=fields['test'],
+                    category=fields['category'],
+                    expected=fields['expected'],
+                    parameters=fields['parameters'],
+                    verdicts=fields['verdicts'],
+                    tags=fields['tags'],
+                    active=active,
+                )
+                .order_by('id')
+                .first()
+            )
+            if rule is None:
+                # A one-off rule only carries the stamp and never applies to
+                # imports, so it is created already deactivated.
+                deactivation = (
+                    {}
+                    if active
+                    else {'deactivated_at': timezone.now(), 'deactivated_by': actor}
+                )
+                rule = rule_serializer.save(created_by=actor, active=active, **deactivation)
+
+            RuleResult.objects.get_or_create(
+                result=result,
+                issue_rule=rule,
+                defaults={'origin': origin, 'created_by': actor},
+            )
+
+        RunCache.delete_data_for_obj(
+            result.test_run,
+            data_keys=RunCache.KEYS_CLASSIFICATION_AFFECTED,
+        )
+
+        data = ClassifyResponseSerializer({'issue_id': issue.id, 'rule_id': rule.id}).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+    def _resolve_issue(self, issue_data, result, actor):
+        if isinstance(issue_data, int) or (
+            isinstance(issue_data, str) and str(issue_data).isdigit()
+        ):
+            issue = get_object_or_404(Issue, pk=int(issue_data))
+            if issue.project_id != result.project_id:
+                raise ValidationError(
+                    {'issue': f'Issue #{issue.id} belongs to a different project.'},
+                )
+            return issue
+        issue_data = {**issue_data, 'project': result.project_id}
+        serializer = IssueSerializer(data=issue_data)
+        serializer.is_valid(raise_exception=True)
+        return serializer.save(created_by=actor)
+
+    def _capture_tags(self, result):
+        important_by_run, _ = get_tags_by_runs([result.test_run])
+        return sorted(important_by_run.get(result.test_run_id, []))
