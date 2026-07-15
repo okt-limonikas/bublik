@@ -123,6 +123,56 @@ class ClassificationService:
         return matched
 
     @staticmethod
+    def apply_active_rules(run: models.TestIterationResult) -> int:
+        """
+        Recompute import-origin RuleResult stamps for a run from the project's
+        active rules. Idempotent: drops previous origin='import' stamps for this
+        run, then rebuilds them from the current set of active rules, so the
+        stamps of deactivated rules are dropped. Manual stamps (manual_persistent
+        / manual_oneoff) are never touched. Only the rules of open issues apply:
+        closing an issue deactivates its rules. A rule that fails to apply is
+        logged and skipped (its own stamps are rolled back), so one broken rule
+        can't block the others.
+
+        Args:
+            run: The run to (re)apply active rules to, typically right after import
+
+        Returns:
+            Number of RuleResult stamps created
+        """
+        logger = get_task_or_server_logger()
+        with transaction.atomic():
+            models.RuleResult.objects.filter(
+                result__test_run=run,
+                origin=models.RuleResultOrigin.IMPORT,
+            ).delete()
+
+            rules = models.IssueRule.objects.filter(
+                issue__project_id=run.project_id,
+                issue__state=models.IssueState.OPEN,
+                active=True,
+            )
+            created = 0
+            for rule in rules:
+                try:
+                    with transaction.atomic():
+                        rule_created = 0
+                        for result in ClassificationService.matching_results(rule, run):
+                            _, made = models.RuleResult.objects.get_or_create(
+                                result=result,
+                                issue_rule=rule,
+                                defaults={'origin': models.RuleResultOrigin.IMPORT},
+                            )
+                            rule_created += int(made)
+                except Exception:
+                    logger.exception(
+                        f'skipping classification rule {rule.id}: failed on run {run.id}'
+                    )
+                else:
+                    created += rule_created
+        return created
+
+    @staticmethod
     def apply_active_rules_manual(
         run: models.TestIterationResult,
         actor: models.User | None = None,
