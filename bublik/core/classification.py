@@ -6,7 +6,9 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import asdict
 
+from django.conf import settings
 from django.db.models import BooleanField, ExpressionWrapper, OuterRef, Prefetch, Q, TextChoices
+from rest_framework.exceptions import ValidationError
 
 from bublik.core.run.dto import RuleResultInfo
 from bublik.data.models import IssueRule, IssueState, RuleResult
@@ -18,6 +20,20 @@ RULE_SUPPRESSION_FILTER = {
 }
 
 DISPOSITION_TO_EXPECTED = {'expected': True, 'unexpected': False, 'none': None}
+
+
+def parse_issue_ids(value, param='issue'):
+    """
+    Split a delimiter-separated list of issue IDs from a query param into
+    ints. Anything that is not a plain number (`abc`, an empty item, a
+    unicode digit like `²`) is rejected with a 400 instead of failing later
+    with a 500.
+    """
+    ids = value.split(settings.QUERY_DELIMITER)
+    if not all(i.isascii() and i.isdecimal() for i in ids):
+        msg = f'Expected issue IDs separated by {settings.QUERY_DELIMITER!r}, got {value!r}.'
+        raise ValidationError({param: msg})
+    return [int(i) for i in ids]
 
 
 class Effect(TextChoices):
