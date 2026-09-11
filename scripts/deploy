@@ -89,6 +89,27 @@ export REDIS_URL="redis://127.0.0.1:6379/0"
 # under CHAT_FILE_STORAGE_DIR, which needs no extra service.
 export CHAT_FILE_STORAGE_DIR="${BUBLIK_HOME}/chat-files"
 
+# Object storage is opt-in: setting S3_ENDPOINT_URL (to the bundled SeaweedFS
+# below, or to a real S3 endpoint) is what switches storage away from disk.
+# SeaweedFS is not packaged for Debian/Ubuntu and is installed by the
+# administrator; the seaweedfs_service step only wires up the service.
+export SEAWEEDFS_DIR="${BUBLIK_HOME}/seaweedfs"
+export SEAWEEDFS_BIN="${SEAWEEDFS_DIR}/weed"
+export SEAWEEDFS_DATA_DIR="${SEAWEEDFS_DIR}/data"
+export SEAWEEDFS_S3_PORT="8333"
+
+# Empty means local disk. To use the bundled SeaweedFS, set this to
+# "http://${BIND_HOST}:${SEAWEEDFS_S3_PORT}" and run the seaweedfs_service step.
+export S3_ENDPOINT_URL=""
+# Set only when the S3 endpoint is reachable from the browser (e.g. real AWS
+# S3); downloads are then redirected to presigned URLs instead of proxied.
+export S3_PUBLIC_ENDPOINT_URL=""
+export S3_ACCESS_KEY="bublik"
+export S3_SECRET_KEY="bublik-secret-key"
+export S3_BUCKET="bublik-chat-files"
+export S3_REGION="us-east-1"
+export S3_PRESIGN_EXPIRY="300"
+
 ### Steps ###
 
 declare -a STEPS
@@ -121,6 +142,7 @@ define_step celery_service           "Create celery service"
 define_step flower_service           "Create flower service"
 define_step mcp_service              "Create MCP service"
 define_step chat_files_dir           "Create AI chat file storage directory"
+define_step seaweedfs_service        "Create SeaweedFS service"
 define_step setup_gunicorn           "Setup gunicorn"
 define_step nginx_conf               "Create nginx configs (requires root)"
 define_step bootstrap_db             "Bootstrap bublik database"
@@ -292,6 +314,12 @@ function handle_user_services() {
     services+=(bublik-logs-ticket)
   fi
 
+  # Storage for AI-chat generated files, only present when chat is enabled.
+  # Prepended so that a start/restart brings it up before gunicorn.
+  if [ -n "${SEAWEEDFS_SERVICE_PATH}" ] && [ -e "${SEAWEEDFS_SERVICE_PATH}" ] ; then
+    services=(bublik-seaweedfs "${services[@]}")
+  fi
+
   for service in ${services[*]}; do
     message "${ACTION}" $service
     systemctl --user "${ACTION}" $service
@@ -358,6 +386,7 @@ function set_vars_dependent_on_options() {
   export FLOWER_SERVICE_PATH="${USER_SERVICES_PATH}/bublik-flower.service"
   export LOGS_TICKET_SERVICE_PATH="${USER_SERVICES_PATH}/bublik-logs-ticket.service"
   export MCP_SERVICE_PATH="${USER_SERVICES_PATH}/bublik-mcp.service"
+  export SEAWEEDFS_SERVICE_PATH="${USER_SERVICES_PATH}/bublik-seaweedfs.service"
 }
 
 function check_repo_revisions() {
@@ -540,11 +569,34 @@ function skip_unless_chat_enabled() {
 
 function chat_files_dir_handler() {
   skip_unless_chat_enabled || return
+  if [ -n "${S3_ENDPOINT_URL}" ] ; then
+    echo "S3_ENDPOINT_URL is set, chat files go to object storage"
+    CURRENT_STEP_SKIPPED=true
+    return
+  fi
   step "Create AI chat file storage directory" && {
     create_bublik_dir "${CHAT_FILE_STORAGE_DIR}"
     # Generated files are private to one user and this tree sits on a shared
     # filesystem, so keep the whole subtree unreadable by anyone else.
     chmod 700 "${CHAT_FILE_STORAGE_DIR}"
+  }
+}
+
+function seaweedfs_service_handler() {
+  skip_unless_chat_enabled || return
+  if [ ! -x "${SEAWEEDFS_BIN}" ] ; then
+    message "SeaweedFS is not installed at ${SEAWEEDFS_BIN}."
+    message "Install it first, see the AI chat deployment documentation."
+    CURRENT_STEP_SKIPPED=true
+    return
+  fi
+  step "Create SeaweedFS service" && {
+    create_bublik_dir "${SEAWEEDFS_DATA_DIR}"
+    if [ ! -e "${SEAWEEDFS_SERVICE_PATH}" ] ||
+    step "SeaweedFS service exists. Rewrite?" ; then
+      set_up_service "${TEMPLATES_DIR}/bublik-seaweedfs.service.template" \
+                     "${SEAWEEDFS_SERVICE_PATH}"
+    fi
   }
 }
 
@@ -736,6 +788,12 @@ fi
 
 # Export server options
 source "$(dirname $0)/exports"
+
+# Service paths are normally released to general.conf by
+# set_vars_dependent_on_options(), which only runs when server options are
+# given. Fill in the ones a host deployed before they existed is missing, so
+# a --steps run works before general.conf has been re-rendered.
+export SEAWEEDFS_SERVICE_PATH="${SEAWEEDFS_SERVICE_PATH:-${USER_SERVICES_PATH}/bublik-seaweedfs.service}"
 
 # Execute steps preserving original order
 for step_name in "${STEPS_NAMES[@]}" ; do
