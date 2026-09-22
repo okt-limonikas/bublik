@@ -64,6 +64,7 @@ from .result import (
     TestIterationResult,
 )
 from .user import User, UserManager, UserRoles
+from .user_mcp_server import SLUG_MAX_LEN, UserMcpServer, slug_for
 from .user_token import (
     TOKEN_PREFIX,
     TokenErrorReason,
@@ -75,6 +76,7 @@ from .user_token import (
 
 
 __all__ = [
+    'SLUG_MAX_LEN',
     'TOKEN_PREFIX',
     'AiChatFile',
     'AiChatThread',
@@ -116,9 +118,11 @@ __all__ = [
     'TokenStatus',
     'User',
     'UserManager',
+    'UserMcpServer',
     'UserRoles',
     'UserToken',
     'UserTokenError',
     'UserTokenManager',
     'View',
+    'slug_for',
 ]

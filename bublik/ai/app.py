@@ -52,10 +52,12 @@ from bublik.ai.config import (
     resolve_provider_headers,
 )
 from bublik.ai.downloads import download_file
+from bublik.ai.mcp import build_user_mcp_toolsets
 from bublik.ai.streaming import RunOptions, spawn_run, stream_run_events
 from bublik.ai.transcript import persist_messages
 from bublik.ai.types import AiChatDeps
 from bublik.core.auth import is_admin
+from bublik.core.user_mcp_server import UserMcpServerService
 from bublik.data.models import AiChatThread
 
 
@@ -193,6 +195,13 @@ async def _run_chat(request: Request) -> Response:  # noqa: PLR0911 - endpoint v
             model_settings=model_settings,
             output_limit=_model_entry.limit.output if _model_entry.limit else None,
         )
+        # User MCP servers differ per user, so they ride the run, not the shared agent.
+        user_servers = await sync_to_async(UserMcpServerService.enabled_for)(user.id)
+        user_toolsets = build_user_mcp_toolsets(
+            user_servers,
+            reserved_ids=config.mcp_server_ids,
+            policy=config.user_mcp_servers,
+        )
         options = RunOptions(
             capabilities=(ProcessHistory(compactor),),
             on_complete=make_usage_reporter(
@@ -203,6 +212,7 @@ async def _run_chat(request: Request) -> Response:  # noqa: PLR0911 - endpoint v
                 _provider.type,
             ),
             model_settings=model_settings,
+            toolsets=tuple(user_toolsets),
         )
         spawn_run(adapter, agent, run_id, deps, options)
     except Exception:

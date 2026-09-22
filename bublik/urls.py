@@ -47,8 +47,10 @@ api_v2_router.register(r'projects', api_v2.ProjectViewSet, 'projects')
 
 if settings.AI_CHAT_ENABLED:
     from bublik.interfaces.api_v2.ai_chat_thread import AiChatThreadViewSet
+    from bublik.interfaces.api_v2.user_mcp_server import UserMcpServerViewSet
 
     api_v2_router.register(r'chat/threads', AiChatThreadViewSet, 'chat-threads')
+    api_v2_router.register(r'chat/mcp-servers', UserMcpServerViewSet, 'chat-mcp-servers')
 
 if settings.ANALYTICS_ENABLED:
     from bublik.interfaces.api_v2.analytics import AnalyticsViewSet
