@@ -265,6 +265,11 @@ class UserMcpServerService:
         return list(UserMcpServer.objects.filter(user_id=user_id, enabled=True))
 
     @staticmethod
+    def all_for(user_id: int) -> list[UserMcpServer]:
+        """Every server of the user, disabled ones included, for the status report."""
+        return list(UserMcpServer.objects.filter(user_id=user_id))
+
+    @staticmethod
     def _get_owned(user: User, server_id) -> UserMcpServer:
         try:
             server = UserMcpServer.objects.get(pk=server_id)

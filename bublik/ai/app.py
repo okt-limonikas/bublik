@@ -15,6 +15,8 @@ Endpoints under ``/api/v2/chat`` (honouring ``URL_PREFIX``):
   run (``thread`` query param). The background run task tears itself down; a
   terminal error event is buffered so the client leaves the streaming state.
 * ``GET  /api/v2/chat/files/{file_id}`` serves a chat-generated file to its owner.
+* ``GET  /api/v2/chat/mcp-status`` reports whether each MCP server the caller's
+  run would attach is reachable.
 
 This module is the thin route table; the machinery lives in sibling modules:
 authorization in :mod:`bublik.ai.access`, run/SSE streaming in
@@ -44,6 +46,7 @@ from bublik.ai.config import (
     ModelRequestError,
     config_fingerprint,
     effective_ai_config,
+    get_ai_config,
     get_effective_ai_config,
     get_raw_ai_config,
     parse_ai_config,
@@ -53,6 +56,7 @@ from bublik.ai.config import (
 )
 from bublik.ai.downloads import download_file
 from bublik.ai.mcp import build_user_mcp_toolsets
+from bublik.ai.mcp_status import collect_status
 from bublik.ai.streaming import RunOptions, spawn_run, stream_run_events
 from bublik.ai.transcript import persist_messages
 from bublik.ai.types import AiChatDeps
@@ -231,6 +235,16 @@ async def _run_chat(request: Request) -> Response:  # noqa: PLR0911 - endpoint v
     )
 
 
+async def _mcp_status(request: Request) -> Response:
+    """Probe the MCP servers a run for this user would attach and report each."""
+    user = await resolve_user(request)
+    if user is None:
+        return JSONResponse({'detail': 'Authentication required.'}, status_code=401)
+    config = await sync_to_async(get_ai_config)()
+    servers = await sync_to_async(UserMcpServerService.all_for)(user.id)
+    return JSONResponse(await collect_status(config, servers))
+
+
 async def _cancel_chat(request: Request) -> Response:
     """Request cancellation of a thread's in-flight run.
 
@@ -261,11 +275,12 @@ def _chat_base_path() -> str:
 
 
 def build_chat_routes() -> list[Route]:
-    """Build the chat model-listing, run, cancellation and file routes."""
+    """Build the chat model-listing, run, cancellation, MCP status and file routes."""
     base = _chat_base_path()
     return [
         Route(f'{base}/models', _list_models, methods=['GET'], name='chat-models'),
         Route(f'{base}/cancel', _cancel_chat, methods=['POST'], name='chat-cancel'),
+        Route(f'{base}/mcp-status', _mcp_status, methods=['GET'], name='chat-mcp-status'),
         Route(
             f'{base}/files/{{file_id}}',
             download_file,
