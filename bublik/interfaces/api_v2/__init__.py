@@ -26,7 +26,7 @@ from .issue.views import (
     TestPickerViewSet,
 )
 from .job_task.views import JobTaskExecutionViewSet
-from .log.views import LogViewSet
+from .log.views import LogViewSet, s3_log
 from .management import clear_all_runs_stats_cache, local_logs, meta_categorization
 from .measurement.views import MeasurementViewSet
 from .outside_domains import OutsideDomainsViewSet
@@ -77,4 +77,5 @@ __all__ = [
     'meta_categorization',
     'render_docs',
     'render_react',
+    's3_log',
 ]
