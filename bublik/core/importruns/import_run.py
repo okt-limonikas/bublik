@@ -151,7 +151,7 @@ def import_run(  # noqa: C901
     logger = get_task_or_server_logger()
 
     project = Project.objects.get(name=project_name) if project_name is not None else None
-    source = run_source_for(run_source_url)
+    source = run_source_for(run_source_url, project.id if project else None)
     process_dir = None
 
     try:
