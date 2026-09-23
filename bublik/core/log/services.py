@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from http import HTTPStatus
+import json
 import os.path
 from typing import TYPE_CHECKING
 
@@ -13,6 +14,13 @@ from rest_framework.exceptions import ValidationError
 
 from bublik.core.exceptions import BadGatewayError, UnprocessableEntityError
 from bublik.core.log.dto import LogContentDTO, LogUrlsDTO
+from bublik.core.log.s3_logs import (
+    LogGenerationError,
+    browser_url,
+    open_log_item,
+    storage_for,
+)
+from bublik.core.logs_storage import is_s3_url, parse_s3_url
 from bublik.core.result.services import ResultService
 from bublik.core.run.external_links import get_result_log, get_sources
 from bublik.core.url import get_url
@@ -80,6 +88,16 @@ class LogService:
             'attachments.json',
         )
 
+        # Runs stored in S3 are served by Bublik itself. Without an origin
+        # (server-side callers) the s3:// URLs are kept for fetch_log_content.
+        if is_s3_url(url):
+            if request_origin:
+                protocol = 'https' if settings.SECURE_HTTP else 'http'
+                origin = f'{protocol}://{request_origin}'
+                url = origin + browser_url(url)
+                attachments_url = origin + browser_url(attachments_url)
+            return LogUrlsDTO(url=url, attachments_url=attachments_url)
+
         # Apply proxy if enabled
         if settings.ENABLE_JSON_LOGS_PROXY and request_origin:
             protocol = 'https' if settings.SECURE_HTTP else 'http'
@@ -92,12 +110,14 @@ class LogService:
         return LogUrlsDTO(url=url, attachments_url=attachments_url)
 
     @staticmethod
-    def get_html_log_url(result_id: int) -> str | None:
+    def get_html_log_url(result_id: int, origin: str | None = None) -> str | None:
         """
         Get HTML log URL for a result.
 
         Args:
             result_id: The ID of the test result
+            origin: Bublik's ``scheme://host`` as the client sees it, to make
+                the URL of a run stored in S3 absolute (else BUBLIK_FQDN is used)
 
         Returns:
             URL string or None if not available
@@ -106,7 +126,7 @@ class LogService:
             NotFoundError: if result not found
         """
         result = ResultService.get_result(result_id)
-        return get_result_log(result)
+        return browser_url(get_result_log(result), origin)
 
     @staticmethod
     def fetch_log_content(url: str, allow_not_found: bool = True) -> JsonValue:
@@ -126,6 +146,9 @@ class LogService:
         if not url:
             msg = 'URL parameter is missing'
             raise UnprocessableEntityError(msg)
+
+        if is_s3_url(url):
+            return LogService.fetch_s3_log_content(url)
 
         try:
             response = get_url(url, quiet_404=allow_not_found, timeout=30)
@@ -147,6 +170,27 @@ class LogService:
         except ValueError as e:
             msg = f'Error parsing JSON: {e!s}'
             raise ValidationError(msg) from e
+
+    @staticmethod
+    def fetch_s3_log_content(url: str) -> JsonValue:
+        """Read a JSON log item of a run stored in S3, generating it if needed."""
+        bucket, key = parse_s3_url(url)
+        storage = storage_for(bucket, key)
+        if storage is None:
+            return None
+        try:
+            item = open_log_item(storage, key)
+        except LogGenerationError as error:
+            raise BadGatewayError(error.message) from error
+        if item is None:
+            return None
+        try:
+            return json.loads(item.stream.read())
+        except ValueError as e:
+            msg = f'Error parsing JSON: {e!s}'
+            raise ValidationError(msg) from e
+        finally:
+            item.stream.close()
 
     @staticmethod
     def get_log_json(result_id: int, page: int | None = None) -> LogContentDTO:
