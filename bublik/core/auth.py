@@ -9,12 +9,12 @@ from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.exceptions import TokenBackendError
 
 from bublik.core.config.services import ConfigServices
+from bublik.core.user_token.services import UserTokenService
 from bublik.data.models import (
     TOKEN_PREFIX,
     GlobalConfigs,
     User,
     UserRoles,
-    UserToken,
     UserTokenError,
 )
 from bublik.settings import SIMPLE_JWT
@@ -46,7 +46,7 @@ def get_user_by_access_token(access_token):
 
 def get_user_by_personal_token(raw_token):
     """Resolve the owner of a personal access token, or raise ``UserTokenError``."""
-    return UserToken.objects.authenticate(raw_token)
+    return UserTokenService.authenticate(raw_token)
 
 
 def get_bearer_token(authorization):
