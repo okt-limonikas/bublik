@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (C) 2024 OKTET Labs Ltd. All rights reserved.
 
+from __future__ import annotations
+
+import contextlib
+from contextvars import ContextVar
 from functools import wraps
 
 from rest_framework.exceptions import PermissionDenied
@@ -92,6 +96,35 @@ def get_request_user(request):
 
 def is_admin(user):
     return user is not None and user.roles == UserRoles.ADMIN
+
+
+# The user that code outside an HTTP request (the chat agent) acts as.
+_acting_user_id: ContextVar[int | None] = ContextVar('bublik_acting_user_id', default=None)
+
+
+@contextlib.contextmanager
+def bind_acting_user(user_id):
+    """Run the enclosed block as ``user_id``.
+
+    Spawned tasks and ``sync_to_async`` threads inherit the binding.
+    """
+    token = _acting_user_id.set(user_id)
+    try:
+        yield
+    finally:
+        _acting_user_id.reset(token)
+
+
+def current_acting_user():
+    """The bound user, or ``None`` when nobody is bound or they are inactive."""
+    user_id = _acting_user_id.get()
+    if user_id is None:
+        return None
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return None
+    return user if user.is_active else None
 
 
 def get_request(*args, **kwargs):
