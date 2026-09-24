@@ -131,6 +131,20 @@ def auth_required(as_admin=False):
     return decorator
 
 
+def action_is_open(action, project_id=None):
+    """Whether the project lets anyone perform ``action``."""
+    return action in ConfigServices.getattr_from_global(
+        GlobalConfigs.PER_CONF.name,
+        'NOT_PERMISSION_REQUIRED_ACTIONS',
+        project_id=project_id,
+    )
+
+
+def action_permitted(action, user, project_id=None):
+    """Whether ``user`` may perform ``action`` in this project."""
+    return action_is_open(action, project_id) or (is_admin(user) and user.is_active)
+
+
 def check_action_permission(action):
     """
     Check if the action requires permission.
@@ -139,13 +153,7 @@ def check_action_permission(action):
     def wrapper(func):
         @wraps(func)
         def inner(self, request, *args, **kwargs):
-            project = request.query_params.get('project')
-            not_permission_required_actions = ConfigServices.getattr_from_global(
-                GlobalConfigs.PER_CONF.name,
-                'NOT_PERMISSION_REQUIRED_ACTIONS',
-                project_id=project,
-            )
-            if action in not_permission_required_actions:
+            if action_is_open(action, request.query_params.get('project')):
                 return func(self, request, *args, **kwargs)
             return auth_required(as_admin=True)(func)(self, request, *args, **kwargs)
 

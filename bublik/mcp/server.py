@@ -26,7 +26,12 @@ def create_mcp_server() -> FastMCP:
         ResponseCachingMiddleware(
             cache_storage=DiskStore(directory='/tmp/bublik-mcp-cache'),
             call_tool_settings={
-                'excluded_tools': USER_SCOPED_TOOL_NAMES,
+                'excluded_tools': (
+                    tools.MCP_WRITE_TOOL_NAMES
+                    + tools.MCP_ADMIN_TOOL_NAMES
+                    + tools.MCP_UNCACHED_TOOL_NAMES
+                    + USER_SCOPED_TOOL_NAMES
+                ),
             },
         ),
     )
