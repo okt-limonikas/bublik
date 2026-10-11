@@ -22,11 +22,7 @@ from bublik.core.meta.match_references import build_revision_references
 from bublik.core.queries import MetaResultsQuery, get_or_none
 from bublik.core.references import REF_PATTERN, resolve_ref
 from bublik.core.run.compromised import get_compromised_details, is_run_compromised
-from bublik.core.run.data import (
-    get_metadata_by_runs,
-    get_tags_by_runs,
-    is_result_unexpected,
-)
+from bublik.core.run.data import get_metadata_by_runs, get_tags_by_runs
 from bublik.core.run.dto import (
     RunCompromisedDetails,
     RunDetailsResult,
@@ -572,6 +568,7 @@ def generate_results_details(test_results):
         artifacts = []
         comments = []
         requirements = []
+        has_err = False
 
         for meta_result in test_result.meta_results.all():
             if meta_result.meta.type == 'result':
@@ -584,6 +581,8 @@ def generate_results_details(test_results):
                 comments.append(meta_result.meta.value)
             elif meta_result.meta.type == 'requirement':
                 requirements.append(meta_result.meta.value)
+            elif meta_result.meta.type == 'err':
+                has_err = True
 
         obtained_result_data = {
             'result_type': result_type,
@@ -613,7 +612,7 @@ def generate_results_details(test_results):
             'parameters': parameters_list,
             'comments': comments,
             'requirements': requirements,
-            'has_error': is_result_unexpected(test_result),
+            'has_error': has_err,
             'has_measurements': exist_measurement_results(test_result),
         }
 
