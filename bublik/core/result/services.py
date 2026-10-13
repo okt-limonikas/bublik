@@ -222,18 +222,7 @@ class ResultService:
                 rule_results__issue_rule__issue_id__in=parse_issue_ids(issue),
             )
 
-        return (
-            queryset.order_by('-start', 'id')
-            .select_related('iteration', 'project')
-            .prefetch_related(
-                'expectations',
-                'expectations__expectmeta_set',
-                'measurement_results',
-                'meta_results__meta',
-                'iteration__test_arguments',
-            )
-            .distinct('id', 'start')
-        )
+        return queryset.order_by('-start', 'id').distinct('id', 'start')
 
     @staticmethod
     def list_results_paginated(  # noqa: PLR0913, PLR0917

@@ -29,7 +29,6 @@ from bublik.core.datetime_formatting import (
     period_to_str,
 )
 from bublik.core.logging import get_task_or_server_logger
-from bublik.core.measurement.services import exist_measurement_results
 from bublik.core.meta.categorization import get_metas_by_category
 from bublik.core.meta.match_references import build_revision_references
 from bublik.core.queries import MetaResultsQuery, get_or_none
@@ -52,6 +51,7 @@ from bublik.core.run.tests_organization import build_test_paths
 from bublik.core.utils import key_value_dict_transforming, key_value_list_transforming
 from bublik.data.models import (
     GlobalConfigs,
+    MeasurementResult,
     Meta,
     MetaResult,
     MetaTest,
@@ -581,13 +581,25 @@ def get_nok_results_distribution(run):
 
 def generate_results_details(test_results):
     test_results = list(test_results)
-    # Classifications stamped on the results, loaded for all of them at once.
+    # Everything a row reads, loaded for the whole batch at once, so callers
+    # hand over a bare queryset and never pay a query per row.
     prefetch_related_objects(
         test_results,
+        'project',
+        'test_run',
+        'iteration__test',
+        'iteration__test_arguments',
+        'expectations__expectmeta_set',
+        'meta_results__meta',
         Prefetch(
             'rule_results',
             queryset=RuleResult.objects.select_related('issue_rule__issue'),
         ),
+    )
+    with_measurements = set(
+        MeasurementResult.objects.filter(
+            result_id__in=[tr.id for tr in test_results],
+        ).values_list('result_id', flat=True),
     )
     test_ids = {tr.iteration.test_id for tr in test_results if tr.iteration}
     test_paths = build_test_paths(test_ids)
@@ -663,7 +675,7 @@ def generate_results_details(test_results):
             'comments': comments,
             'requirements': requirements,
             'has_error': has_err and not effective_expected,
-            'has_measurements': exist_measurement_results(test_result),
+            'has_measurements': result_id in with_measurements,
             'issues': issues,
             'effective_expected': effective_expected,
         }
