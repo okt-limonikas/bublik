@@ -218,9 +218,7 @@ class ResultService:
 
         # issue filtering
         if issue:
-            queryset = queryset.filter(
-                rule_results__issue_rule__issue_id__in=parse_issue_ids(issue),
-            )
+            queryset = queryset.stamped_under(parse_issue_ids(issue))
 
         return queryset.order_by('-start', 'id').distinct('id', 'start')
 

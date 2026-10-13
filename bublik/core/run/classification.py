@@ -434,10 +434,8 @@ class ClassificationService:
             same shape and ordering as the plain /results/ listing.
         """
         return (
-            models.TestIterationResult.objects.filter(
-                test_run=run,
-                rule_results__issue_rule__issue_id=issue_id,
-            )
+            models.TestIterationResult.objects.filter(test_run=run)
+            .stamped_under([issue_id])
             .distinct()
             .order_by('-start', 'id')
         )
