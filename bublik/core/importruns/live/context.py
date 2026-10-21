@@ -612,11 +612,25 @@ class LiveLogContext:
                         'artifact processing failure: missing test iteration result',
                     )
 
+    #: How a finished run may end, by the 'status' the finish request names:
+    #: DONE when it names none, as a run that ran to its end; INTERRUPTED for
+    #: one stopped before its end (a cancelled CI job), ERROR for one that
+    #: ended with failures.
+    FINISH_STATUSES: ClassVar[dict[str, str]] = {
+        'DONE': 'RUN_STATUS_DONE',
+        'ERROR': 'RUN_STATUS_ERROR',
+        'INTERRUPTED': 'RUN_STATUS_INTERRUPTED',
+    }
+
     def finish(self, data):
-        """Initialize import using TE log streaming protocol."""
+        """Finish the import using TE log streaming protocol."""
         if 'ts' not in data:
             msg = 'timestamp is required'
             raise LLInvalidInputError(msg)
+        status = data.get('status', 'DONE')
+        if status not in self.FINISH_STATUSES:
+            msg = f'unknown status {status!r}: one of {", ".join(self.FINISH_STATUSES)}'
+            raise LLInvalidInputError(msg)
         dt = utc_ts_to_dt(data['ts'])
         self.last_ts = dt
-        self.finish_run('RUN_STATUS_DONE')
+        self.finish_run(self.FINISH_STATUSES[status])
