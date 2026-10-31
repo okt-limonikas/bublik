@@ -3,6 +3,7 @@
 
 from .auth.views import (
     AdminViewSet,
+    CapabilitiesViewSet,
     PasswordResetViewSet,
     ProfileViewSet,
     RegistrationViewSet,
@@ -42,6 +43,7 @@ from .user_token.views import UserTokenViewSet
 
 __all__ = [
     'AdminViewSet',
+    'CapabilitiesViewSet',
     'ConfigViewSet',
     'DashboardPayload',
     'DashboardViewSet',
