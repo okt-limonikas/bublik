@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 from django.shortcuts import get_object_or_404
 
 from bublik.core.config.services import ConfigServices
-from bublik.core.log.s3_logs import browser_url
 from bublik.core.queries import get_or_none
 from bublik.core.run.tests_organization import get_run_root
 from bublik.data import models
@@ -104,6 +103,9 @@ def get_trc_brief(result):
     """
     Returns result source link to trc-brief.
     """
+
+    # bublik.core.log imports bublik.core.run.stats, which imports this module.
+    from bublik.core.log.s3_logs import browser_url
 
     try:
         run_source_link = get_sources(result)
