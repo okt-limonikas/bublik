@@ -416,19 +416,19 @@ class JsonLogUrlsTest(SimpleTestCase):
     def test_s3_runs_get_bublik_urls_and_skip_the_proxy(self):
         urls = self.urls('s3://b/run/', 'bublik.example')
         self.assertEqual(
-            urls['url'], 'https://bublik.example/api/v2/logs/s3/b/run/json/node_id5.json'
+            urls.url, 'https://bublik.example/api/v2/logs/s3/b/run/json/node_id5.json'
         )
         self.assertTrue(
-            urls['attachments_url'].startswith('https://bublik.example/api/v2/logs/s3/')
+            urls.attachments_url.startswith('https://bublik.example/api/v2/logs/s3/')
         )
 
     def test_server_side_callers_keep_s3_urls(self):
-        self.assertEqual(self.urls('s3://b/run/', None)['url'], 's3://b/run/json/node_id5.json')
+        self.assertEqual(self.urls('s3://b/run/', None).url, 's3://b/run/json/node_id5.json')
 
     def test_log_server_runs_are_unchanged(self):
         urls = self.urls('https://logs.example/logs/run/', 'bublik.example')
         self.assertIn(
-            '/api/v2/logs/proxy/?url=https://logs.example/logs/run/json/', urls['url']
+            '/api/v2/logs/proxy/?url=https://logs.example/logs/run/json/', urls.url
         )
 
     def test_the_html_log_url_is_absolute_for_the_requesting_client(self):
@@ -467,13 +467,13 @@ class PresignedLogUrlsTest(SimpleTestCase):
         urls = self.urls(self.public_base, lambda key, **_: key.endswith('.json'))
         run = RUN.replace(':', '%3A')
         self.assertTrue(
-            urls['url'].startswith(f'https://s3.example.com/bublik-logs/{run}json/')
+            urls.url.startswith(f'https://s3.example.com/bublik-logs/{run}json/')
         )
-        self.assertIn('X-Amz-Signature=', urls['url'])
+        self.assertIn('X-Amz-Signature=', urls.url)
 
     def test_missing_pages_go_through_bublik(self):
         urls = self.urls(self.public_base, lambda key, **_: False)
-        self.assertTrue(urls['url'].startswith('https://bublik.example/api/v2/logs/s3/'))
+        self.assertTrue(urls.url.startswith('https://bublik.example/api/v2/logs/s3/'))
 
     @override_settings(ENABLE_JSON_LOGS_PROXY=True)
     def test_the_proxy_switch_keeps_existing_pages_on_bublik(self):
@@ -481,15 +481,15 @@ class PresignedLogUrlsTest(SimpleTestCase):
         # for deployments that cannot allow that.
         with mock.patch('bublik.core.s3.public_read_url') as presign:
             urls = self.urls(self.public_base, lambda key, **_: True)
-        self.assertTrue(urls['url'].startswith('https://bublik.example/api/v2/logs/s3/'))
+        self.assertTrue(urls.url.startswith('https://bublik.example/api/v2/logs/s3/'))
         self.assertTrue(
-            urls['attachments_url'].startswith('https://bublik.example/api/v2/logs/s3/')
+            urls.attachments_url.startswith('https://bublik.example/api/v2/logs/s3/')
         )
         presign.assert_not_called()
 
     def test_without_a_public_endpoint_everything_goes_through_bublik(self):
         urls = self.urls(S3_BASE, lambda key, **_: True)
-        self.assertTrue(urls['url'].startswith('https://bublik.example/api/v2/logs/s3/'))
+        self.assertTrue(urls.url.startswith('https://bublik.example/api/v2/logs/s3/'))
         self.assertTrue(
-            urls['attachments_url'].startswith('https://bublik.example/api/v2/logs/s3/')
+            urls.attachments_url.startswith('https://bublik.example/api/v2/logs/s3/')
         )
