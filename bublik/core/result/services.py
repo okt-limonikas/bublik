@@ -11,7 +11,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from bublik.core.cache import RunCache
-from bublik.core.classification import parse_issue_ids
+from bublik.core.classification import parse_categories, parse_issue_ids
 from bublik.core.exceptions import NotFoundError
 from bublik.core.issue import IssueManagementService, IssueRuleManagementService
 from bublik.core.measurement.services import (
@@ -653,6 +653,7 @@ class ResultService:
         result_properties: str | None = None,
         requirements: str | None = None,
         issue: str | None = None,
+        categories: str | None = None,
     ):
         """
         List results with filtering.
@@ -667,6 +668,8 @@ class ResultService:
             result_properties: Comma-separated result properties
             requirements: Comma-separated requirement names
             issue: Semicolon-separated issue IDs
+            categories: Semicolon-separated classification categories; with
+                `issue`, the categories of the stamps of these issues
 
         Returns:
             QuerySet of filtered TestIterationResult objects
@@ -756,9 +759,15 @@ class ResultService:
             for req_meta in available_req_metas:
                 queryset = queryset.filter(meta_results__meta=req_meta)
 
-        # issue filtering
+        # Issue and category filtering, in one filter() call, so that both
+        # hold for the same stamp, as in the history.
+        stamp_query = {}
         if issue:
-            queryset = queryset.stamped_under(parse_issue_ids(issue))
+            stamp_query['rule_results__issue_rule__issue_id__in'] = parse_issue_ids(issue)
+        if categories:
+            stamp_query['rule_results__issue_rule__category__in'] = parse_categories(categories)
+        if stamp_query:
+            queryset = queryset.filter(**stamp_query)
 
         return queryset.order_by('-start', 'id').distinct('id', 'start')
 
@@ -773,6 +782,7 @@ class ResultService:
         issue: str | None = None,
         page: int | None = None,
         page_size: int | None = None,
+        categories: str | None = None,
     ) -> dict:
         """
         List results with filtering and pagination.
@@ -789,6 +799,7 @@ class ResultService:
             issue: Semicolon-separated issue IDs
             page: Page number (default: 1)
             page_size: Items per page (default: 25, max: 10000)
+            categories: Semicolon-separated classification categories
 
         Returns:
             Dictionary with pagination metadata and result details
@@ -801,6 +812,7 @@ class ResultService:
             result_properties=result_properties,
             requirements=requirements,
             issue=issue,
+            categories=categories,
         )
 
         results_details = generate_results_details(queryset)

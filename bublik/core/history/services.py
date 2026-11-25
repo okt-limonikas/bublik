@@ -8,7 +8,7 @@ from django.db.models import BooleanField, Case, Exists, F, OuterRef, Q, Value, 
 from rest_framework.exceptions import ValidationError
 
 from bublik.core.cache import ProjectCache
-from bublik.core.classification import parse_issue_ids, suppressed_subquery
+from bublik.core.classification import parse_categories, parse_issue_ids, suppressed_subquery
 from bublik.core.datetime_formatting import display_to_date_in_numbers
 from bublik.core.exceptions import NotFoundError
 from bublik.core.history.dto import (
@@ -40,7 +40,6 @@ from bublik.core.run.utils import prepare_dates_period
 from bublik.core.utils import key_value_dict_transforming, key_value_list_transforming
 from bublik.data.models import (
     Issue,
-    IssueCategory,
     MeasurementResult,
     Meta,
     MetaResult,
@@ -466,11 +465,7 @@ class HistoryService:
         # category.
         stamp_query = {}
         if categories:
-            category_list = categories.split(query_delimiter)
-            if any(category not in IssueCategory.values for category in category_list):
-                msg = f'Expected any of: {", ".join(IssueCategory.values)}.'
-                raise ValidationError({'categories': msg})
-            stamp_query['rule_results__issue_rule__category__in'] = category_list
+            stamp_query['rule_results__issue_rule__category__in'] = parse_categories(categories)
         if issue:
             stamp_query['rule_results__issue_rule__issue_id__in'] = parse_issue_ids(issue)
         if stamp_query:
