@@ -211,6 +211,22 @@ def get_allowed_actions(request):
     }
 
 
+def action_is_open(action, project_id=None):
+    """Whether the project lets anyone perform ``action``."""
+    return action in get_not_permission_required_actions(project_id)
+
+
+def action_permitted(action, user, project_ids=()):
+    """Whether ``user`` may perform ``action`` in every one of the projects.
+
+    The same rule as `check_action_permission_for_projects`, for callers
+    without a request: with no projects the global settings apply.
+    """
+    if all(action_is_open(action, project_id) for project_id in set(project_ids) or {None}):
+        return True
+    return is_admin(user) and user.is_active
+
+
 def check_action_permission_for_projects(request, action, project_ids):
     """
     Check the action against the projects it touches.
@@ -224,7 +240,7 @@ def check_action_permission_for_projects(request, action, project_ids):
     by the client, so it can't be trusted to name them.
     """
     for project_id in set(project_ids) or {None}:
-        if action not in get_not_permission_required_actions(project_id):
+        if not action_is_open(action, project_id):
             require_user(request, as_admin=True)
             return
 
