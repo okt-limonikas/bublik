@@ -16,7 +16,6 @@ from bublik.core.classification import suppressed_subquery
 from bublik.core.config.services import ConfigServices
 from bublik.core.datetime_formatting import date_str_to_db
 from bublik.core.exceptions import NotFoundError
-from bublik.core.log.s3_logs import browser_url
 from bublik.core.pagination_helpers import PaginatedResult
 from bublik.core.run.compromised import (
     is_run_compromised,
@@ -138,6 +137,10 @@ class RunService:
         Returns:
             Source URL string
         """
+        # bublik.core.log imports the result and issue services, which import
+        # the history service, which imports this module through the reports.
+        from bublik.core.log.s3_logs import browser_url
+
         run = RunService.get_run(run_id)
         return browser_url(get_sources(run), origin)
 
