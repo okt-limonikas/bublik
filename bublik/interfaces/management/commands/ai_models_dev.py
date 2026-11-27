@@ -12,6 +12,9 @@ Usage::
     python manage.py ai_models_dev --generate-schema
     python manage.py ai_models_dev --sync
     python manage.py ai_models_dev --sync --source api.json
+
+``--sync`` and ``--generate-schema`` change files of the sources and are for
+a development checkout: commit what they change.
 """
 
 from __future__ import annotations
@@ -66,12 +69,14 @@ class Command(BaseCommand):
             '--sync',
             action='store_true',
             default=False,
-            help='Refresh the bundled models.dev snapshot and the provider-id enum',
+            help='Refresh the bundled models.dev snapshot and the provider-id enum, '
+            'in a development checkout: both are tracked files, to be committed',
         )
         parser.add_argument(
             '--source',
             default=models_dev.API_URL,
-            help='URL or file to sync from, e.g. a copy of api.json for an offline host '
+            help='URL or file to sync from, e.g. a copy of api.json where models.dev '
+            'is out of reach '
             f'(default: {models_dev.API_URL})',
         )
 

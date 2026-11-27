@@ -246,8 +246,8 @@ class ConfigManagementServiceTest(TestCase):
         mine = self._create()
         theirs = self._create(project=other.id)
 
-        assert set(ConfigManagementService.list()) == {mine, theirs}
-        assert list(ConfigManagementService.list(other.id)) == [theirs]
+        assert set(ConfigManagementService.list_configs()) == {mine, theirs}
+        assert list(ConfigManagementService.list_configs(other.id)) == [theirs]
 
     def test_versions_lists_every_version_the_active_one_first(self):
         first = self._create()

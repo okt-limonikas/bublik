@@ -28,7 +28,7 @@ class ChatToolsTest(SimpleTestCase):
         names = _names(chat_tools(admin=False))
 
         assert _names(tools.MCP_TOOLS) <= names
-        assert {'edit_run_comment', 'set_run_compromised', 'generate_file'} <= names
+        assert {'edit_run_comment', 'delete_run_comment', 'generate_file'} <= names
         assert not _names(tools.MCP_TOOL_ACTIONS) & names
 
     def test_a_write_comes_with_its_action(self):

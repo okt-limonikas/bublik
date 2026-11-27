@@ -645,7 +645,7 @@ class ResultService:
         return outcome
 
     @staticmethod
-    def list_results(  # noqa: C901
+    def list_results(
         parent_id: int | None = None,
         test_name: str | None = None,
         start_exec_seqno: str | None = None,
@@ -759,15 +759,11 @@ class ResultService:
             for req_meta in available_req_metas:
                 queryset = queryset.filter(meta_results__meta=req_meta)
 
-        # Issue and category filtering, in one filter() call, so that both
-        # hold for the same stamp, as in the history.
-        stamp_query = {}
-        if issue:
-            stamp_query['rule_results__issue_rule__issue_id__in'] = parse_issue_ids(issue)
-        if categories:
-            stamp_query['rule_results__issue_rule__category__in'] = parse_categories(categories)
-        if stamp_query:
-            queryset = queryset.filter(**stamp_query)
+        # issue and category filtering
+        queryset = queryset.stamped_under(
+            parse_issue_ids(issue) if issue else None,
+            parse_categories(categories) if categories else None,
+        )
 
         return queryset.order_by('-start', 'id').distinct('id', 'start')
 

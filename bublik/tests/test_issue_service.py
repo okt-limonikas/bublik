@@ -90,12 +90,12 @@ class IssueManagementServiceTest(TestCase):
         )
 
         def listed(**filters):
-            return set(IssueManagementService.list(filters, test_name='ping'))
+            return set(IssueManagementService.list_issues(filters, test_name='ping'))
 
         assert listed() == {self.issue, elsewhere}
         assert listed(project=self.project.id) == {self.issue}
         with pytest.raises(NotFoundError):
-            IssueManagementService.list({}, test_name='no such test')
+            IssueManagementService.list_issues({}, test_name='no such test')
 
     def test_delete_takes_the_stamps_and_drops_the_caches(self):
         with mock.patch('bublik.core.issue.services.RunCache') as cache:

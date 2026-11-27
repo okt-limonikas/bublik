@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (C) 2025-2026 OKTET Labs Ltd. All rights reserved.
 
-import gzip
 import io
 import json
 from pathlib import Path
@@ -41,7 +40,7 @@ _CATALOGUE = {
 
 class SnapshotTest(SimpleTestCase):
     def setUp(self):
-        self.path = Path(tempfile.mkdtemp()) / 'models_dev.json.gz'
+        self.path = Path(tempfile.mkdtemp()) / 'models_dev.json'
         patcher = mock.patch.object(models_dev, 'SNAPSHOT_PATH', self.path)
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -49,8 +48,7 @@ class SnapshotTest(SimpleTestCase):
 
     def test_keeps_only_the_fields_bublik_reads(self):
         models_dev.write_snapshot(_CATALOGUE)
-        with gzip.open(self.path, 'rt') as snapshot:
-            stored = json.load(snapshot)
+        stored = json.loads(self.path.read_text())
         self.assertNotIn('npm', stored['acme'])
         self.assertEqual(
             stored['acme']['models']['acme-1'],
@@ -68,6 +66,26 @@ class SnapshotTest(SimpleTestCase):
         first = self.path.read_bytes()
         models_dev.write_snapshot(json.loads(json.dumps(_CATALOGUE)))
         self.assertEqual(first, self.path.read_bytes())
+
+    def test_a_model_takes_one_line(self):
+        catalogue = {
+            'beta': {'models': {}},
+            'acme': {'id': 'acme', 'models': {'b': {'name': 'B'}, 'a': {'name': 'A'}}},
+        }
+        text = models_dev.dump(catalogue)
+        self.assertEqual(json.loads(text), catalogue)
+        self.assertEqual(
+            text.splitlines(),
+            [
+                '{',
+                ' "acme": {"id": "acme", "models": {',
+                '  "a": {"name": "A"},',
+                '  "b": {"name": "B"}',
+                ' }},',
+                ' "beta": {"models": {}}',
+                '}',
+            ],
+        )
 
     def test_discovery_reads_the_snapshot(self):
         models_dev.write_snapshot(_CATALOGUE)

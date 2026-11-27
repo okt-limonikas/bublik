@@ -152,7 +152,7 @@ class McpAnonymousAccessTest(McpAuthTestCase):
             return {tool.name for tool in await client.list_tools()}
 
         names = self.run_session(self._token_for(self.user), body)
-        assert {'edit_run_comment', 'set_run_compromised'} <= names
+        assert {'edit_run_comment', 'delete_run_comment', 'set_run_compromised'} <= names
         assert not {tool.__name__ for tool in tools.MCP_TOOL_ACTIONS} & names
 
         names = self.run_session(self._token_for(self.admin, 'admin'), body)
@@ -454,11 +454,25 @@ class McpCompromisedToolTest(McpAuthTestCase):
         assert second.data['comment'] == 'two'
         assert MetaResult.objects.filter(result=self.run, meta__type='comment').count() == 1
 
-        removed = self._call(token, 'edit_run_comment', {'run_id': self.run.id})
+        removed = self._call(token, 'delete_run_comment', {'run_id': self.run.id})
         assert not removed.is_error, removed.content
         assert removed.data['comment'] is None
         assert not MetaResult.objects.filter(result=self.run, meta__type='comment').exists()
-        assert not self._call(token, 'edit_run_comment', {'run_id': self.run.id}).is_error
+
+        again = self._call(token, 'delete_run_comment', {'run_id': self.run.id})
+        assert again.is_error
+        assert 'No comment found' in str(again.content)
+
+    def test_a_blank_run_comment_is_refused_and_removes_nothing(self):
+        token = self._token_for(self.user)
+        self._call(token, 'edit_run_comment', {'run_id': self.run.id, 'comment': 'kept'})
+
+        blank = self._call(token, 'edit_run_comment', {'run_id': self.run.id, 'comment': '   '})
+
+        assert blank.is_error
+        assert 'comment text' in str(blank.content)
+        comment = MetaResult.objects.get(result=self.run, meta__type='comment')
+        assert comment.meta.value == 'kept'
 
     def test_a_rejected_remark_keeps_the_existing_mark(self):
         token = self._token_for(self.user)
@@ -525,7 +539,7 @@ class McpTestCommentToolsTest(McpAuthTestCase):
         assert edited.data['comment_id'] != comment_id
         assert MetaTest.objects.filter(test=self.test).count() == 1
 
-        deleted = self._call('edit_test_comment', comment_id=edited.data['comment_id'])
+        deleted = self._call('delete_test_comment', comment_id=edited.data['comment_id'])
         assert not deleted.is_error, deleted.content
         assert deleted.data == {'removed': edited.data['comment_id']}
         assert not MetaTest.objects.filter(test=self.test).exists()
@@ -548,15 +562,26 @@ class McpTestCommentToolsTest(McpAuthTestCase):
         assert [row['comment'] for row in call('get_test_comments').data] == ['fresh']
 
     def test_an_unknown_comment_is_reported(self):
-        result = self._call('edit_test_comment', comment_id=999999)
-        assert result.is_error
-        assert 'not found' in str(result.content)
+        for name, arguments in (
+            ('edit_test_comment', {'comment': 'text'}),
+            ('delete_test_comment', {}),
+        ):
+            result = self._call(name, comment_id=999999, **arguments)
+            assert result.is_error, name
+            assert 'not found' in str(result.content)
 
-    def test_nothing_to_do_is_reported(self):
-        result = self._call('edit_test_comment')
-        assert result.is_error
-        assert 'comment text' in str(result.content)
-        assert not MetaTest.objects.filter(test=self.test).exists()
+    def test_blank_text_is_refused_and_removes_nothing(self):
+        added = self._call('edit_test_comment', comment='kept')
+
+        for arguments in (
+            {'comment': '   '},
+            {'comment': '   ', 'comment_id': added.data['comment_id']},
+        ):
+            result = self._call('edit_test_comment', **arguments)
+            assert result.is_error, arguments
+            assert 'comment text' in str(result.content)
+
+        assert [row['comment'] for row in self._call('get_test_comments').data] == ['kept']
 
 
 @override_settings(CACHES={'default': _DUMMY, 'run': _LOCMEM, 'project': _LOCMEM})

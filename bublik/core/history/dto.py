@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from bublik.core.run.dto import RuleResultInfo
 
@@ -105,13 +105,7 @@ class HistoryVerdictResultDTO:
     start_date: str
     important_tags: list[str]
     relevant_tags: list[str]
-    issues: list[RuleResultInfo] = field(default_factory=list)
-
-    def __post_init__(self):
-        self.issues = [
-            issue if isinstance(issue, RuleResultInfo) else RuleResultInfo(**issue)
-            for issue in self.issues
-        ]
+    issues: list[RuleResultInfo]
 
 
 @dataclass
@@ -130,6 +124,10 @@ class HistoryIterationGroupDTO:
     parameters: list[str]
     results_by_verdicts: list[HistoryVerdictGroupDTO]
 
+    @staticmethod
+    def _issues(issues: list[dict]) -> list[RuleResultInfo]:
+        return [RuleResultInfo(**issue) for issue in issues]
+
     @classmethod
     def from_data(cls, data: dict) -> HistoryIterationGroupDTO:
         return cls(
@@ -143,7 +141,10 @@ class HistoryIterationGroupDTO:
                     has_error=group['has_error'],
                     verdict=group['verdict'],
                     results_data=[
-                        HistoryVerdictResultDTO(**result) for result in group['results_data']
+                        HistoryVerdictResultDTO(
+                            **{**result, 'issues': cls._issues(result['issues'])},
+                        )
+                        for result in group['results_data']
                     ],
                 )
                 for group in data['results_by_verdicts']

@@ -87,6 +87,7 @@ class RunOverviewCommentsTest(SimpleTestCase):
         assert '| 200 | 55 | test | suite / leaf |' in text
         assert '[910] flaky' in text
         assert '`edit_test_comment`' in text
+        assert '`delete_test_comment`' in text
 
     def test_an_empty_run_keeps_the_column_count(self):
         text = render_run_overview(_details(), None, None, None)

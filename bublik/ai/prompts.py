@@ -49,27 +49,26 @@ FILES_GUIDE = (
 
 WRITE_GUIDE = (
     '\n\n## Making Changes\n\n'
-    'You can also change data on behalf of the user. Each tool works out '
-    'whether to add, change or remove from what you pass: `edit_run_comment` '
-    "(text sets the run's single comment, no text removes it) and "
-    '`set_run_compromised` (`compromised=true` with a mandatory comment and '
-    'an optional bug reference marks or re-marks the run, '
-    '`compromised=false` clears the mark). Every change is recorded as the '
-    'user, so only do what they asked for. Before an action that removes or '
-    'replaces something (clearing a compromised mark, removing a comment, '
-    'deleting or overwriting a config) confirm with the user unless they '
-    'explicitly asked for exactly that. If a tool refuses because the user '
-    'is not allowed to do something, say so plainly and do not try again '
-    'with other arguments.'
+    'You can also change data on behalf of the user. `edit_run_comment` sets '
+    "the run's single comment and `delete_run_comment` removes it. "
+    '`set_run_compromised` marks or re-marks the run (`compromised=true` '
+    'with a mandatory comment and an optional bug reference) and clears the '
+    'mark (`compromised=false`). Every change is recorded as the user, so '
+    'only do what they asked for. Before an action that removes or replaces '
+    'something (clearing a compromised mark, removing a comment, deleting or '
+    'overwriting a config) confirm with the user unless they explicitly '
+    'asked for exactly that. If a tool refuses because the user is not '
+    'allowed to do something, say so plainly and do not try again with '
+    'other arguments.'
 )
 
 
 TEST_COMMENTS_GUIDE = (
-    ' `edit_test_comment` works on the comments of a test in the same way: '
-    'text without `comment_id` adds, text with `comment_id` replaces, '
-    "`comment_id` without text removes. A run overview shows each test's "
+    ' `edit_test_comment` adds a comment to a test (text without '
+    '`comment_id`) or replaces one (text with `comment_id`), and '
+    "`delete_test_comment` removes one. A run overview shows each test's "
     'Test ID, its comments as `[comment_id] text`, and the Project ID the '
-    'tool needs; `get_test_comments` lists the comments of one test on its '
+    'tools need; `get_test_comments` lists the comments of one test on its '
     'own.'
 )
 

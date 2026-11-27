@@ -151,8 +151,9 @@ class ClassificationReadToolsTest(TestCase):
         by_results = call(tools.list_issues, ordering='-result_count')['issues']
         assert [issue['id'] for issue in by_results] == [self.loss.id, self.stale.id]
         assert call(tools.list_issues, created_before='2000-01-01')['issues'] == []
-        with pytest.raises(ValidationError):
-            call(tools.list_issues, ordering='bogus')
+        for ordering in ('bogus', 'title,state'):
+            with pytest.raises(ValidationError, match='created_at'):
+                call(tools.list_issues, ordering=ordering)
 
     def test_list_issue_rules_filters_across_issues(self):
         every = call(tools.list_issue_rules, project_id=self.project.id)
@@ -160,6 +161,8 @@ class ClassificationReadToolsTest(TestCase):
 
         of_loss = call(tools.list_issue_rules, issue_id=self.loss.id, ordering='category')
         assert [rule['id'] for rule in of_loss['rules']] == [self.known.id, self.marker.id]
+        with pytest.raises(ValidationError, match='issue_title'):
+            call(tools.list_issue_rules, ordering='bogus')
         markers = call(tools.list_issue_rules, expected='none')['rules']
         assert [rule['id'] for rule in markers] == [self.marker.id]
         closed = call(tools.list_issue_rules, issue_state='closed', category='flaky')['rules']

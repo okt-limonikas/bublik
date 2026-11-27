@@ -4,15 +4,18 @@
 The models.dev catalogue snapshot shipped with Bublik.
 
 https://models.dev/api.json is trimmed to the fields Bublik reads and kept in
-``bublik/data/models_dev.json.gz``, so model metadata needs no network access.
-``manage.py ai_models_dev --sync`` refreshes it.
+``bublik/data/models_dev.json``, so model metadata needs no network access.
+
+The snapshot is a part of the sources. ``manage.py ai_models_dev --sync``
+refreshes it in a development checkout, and the result is committed. It is
+not meant for a deployed instance: the working tree would be left changed,
+and the running services keep the snapshot they loaded until restarted.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import lru_cache
-import gzip
 import json
 from pathlib import Path
 
@@ -22,7 +25,7 @@ import bublik.data
 
 
 API_URL = 'https://models.dev/api.json'
-SNAPSHOT_PATH = Path(bublik.data.__file__).parent / 'models_dev.json.gz'
+SNAPSHOT_PATH = Path(bublik.data.__file__).parent / 'models_dev.json'
 
 _PROVIDER_FIELDS = ('id', 'name', 'api', 'doc', 'env')
 _MODEL_FIELDS = ('name', 'tool_call', 'reasoning')
@@ -91,12 +94,32 @@ def fetch(source: str = API_URL) -> dict:
     return json.loads(Path(source).read_text(encoding='utf-8'))
 
 
+def _dumps(value) -> str:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False)
+
+
+def dump(catalogue: dict) -> str:
+    """
+    A trimmed catalogue as JSON with a line for each model, so that a sync
+    shows in a diff as the models it added, changed and removed. The same
+    catalogue always gives the same text.
+    """
+    providers = []
+    for provider_id, provider in sorted(catalogue.items()):
+        head = _dumps({key: value for key, value in provider.items() if key != 'models'})
+        models = ',\n'.join(
+            f'  {_dumps(model_id)}: {_dumps(model)}'
+            for model_id, model in sorted(provider['models'].items())
+        )
+        opening = f'{head[:-1]}, "models": {{' if head != '{}' else '{"models": {'
+        body = f'\n{models}\n ' if models else ''
+        providers.append(f' {_dumps(provider_id)}: {opening}{body}}}}}')
+    return '{\n' + ',\n'.join(providers) + '\n}\n'
+
+
 def write_snapshot(catalogue: dict, path: Path | None = None) -> None:
-    """Store the trimmed catalogue; the same catalogue always gives the same bytes."""
-    data = json.dumps(
-        trim(catalogue), sort_keys=True, separators=(',', ':'), ensure_ascii=False
-    )
-    (path or SNAPSHOT_PATH).write_bytes(gzip.compress(data.encode(), compresslevel=9, mtime=0))
+    """Store the trimmed catalogue."""
+    (path or SNAPSHOT_PATH).write_text(dump(trim(catalogue)), encoding='utf-8')
     load_providers.cache_clear()
 
 
@@ -120,8 +143,7 @@ def _model(model_id: str, data: dict) -> Model:
 @lru_cache(maxsize=1)
 def load_providers(path: Path | None = None) -> dict[str, Provider]:
     """Provider id -> provider, read from the snapshot (cached)."""
-    with gzip.open(path or SNAPSHOT_PATH, 'rt', encoding='utf-8') as snapshot:
-        catalogue = json.load(snapshot)
+    catalogue = json.loads((path or SNAPSHOT_PATH).read_text(encoding='utf-8'))
     return {
         provider_id: Provider(
             id=data.get('id', provider_id),

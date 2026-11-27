@@ -85,11 +85,17 @@ class IssueViewSet(ModelViewSet):
         'head',
         'options',
     ]
+    # The backends describe the query parameters in the schema; it is the
+    # service that applies them, as it does for the MCP tools.
     filterset_class = IssueFilterSet
     filter_backends: typing.ClassVar[list] = [DjangoFilterBackend, StableOrderingFilter]
     pagination_class = PerProjectPageNumberPagination
     ordering_fields: typing.ClassVar[list] = IssueManagementService.ORDERING_FIELDS
     ordering: typing.ClassVar[list] = ['-created_at']
+
+    def filter_queryset(self, queryset):
+        params = self.request.query_params
+        return IssueManagementService.list_issues(params, params.get('ordering'))
 
     @action(detail=False, methods=['get'])
     def facets(self, request, *args, **kwargs):
@@ -177,11 +183,16 @@ class IssueRuleViewSet(ModelViewSet):
         'head',
         'options',
     ]
+    # As in IssueViewSet: described by the backends, applied by the service.
     filterset_class = IssueRuleFilterSet
     filter_backends: typing.ClassVar[list] = [DjangoFilterBackend, StableOrderingFilter]
     pagination_class = IssueRulePagination
     ordering_fields: typing.ClassVar[list] = IssueRuleManagementService.ORDERING_FIELDS
     ordering: typing.ClassVar[list] = ['-created_at']
+
+    def filter_queryset(self, queryset):
+        params = self.request.query_params
+        return IssueRuleManagementService.list_rules(params, params.get('ordering'))
 
     @action(detail=False, methods=['get'])
     def facets(self, request, *args, **kwargs):

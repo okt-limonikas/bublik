@@ -18,7 +18,6 @@ from fastmcp.exceptions import ToolError
 from rest_framework.exceptions import APIException, ValidationError
 
 from bublik.core.auth import actions_permitted_somewhere, is_admin
-from bublik.core.cache import RunCache
 from bublik.core.classification import DISPOSITION_TO_EXPECTED
 from bublik.core.comment import TestCommentService
 from bublik.core.config.management import ConfigManagementService
@@ -309,7 +308,7 @@ async def get_latest_run_date(project_id: int | None = None) -> str | None:
         Date string in yyyy-mm-dd format, or None if no runs exist
     """
 
-    return await sync_to_async(RunService.get_latest_run_date)(project_id)
+    return await sync_to_async(RunService.get_latest_uncompromised_run_date)(project_id)
 
 
 # Dashboard tools
@@ -747,89 +746,126 @@ async def get_test_comments(test_id: int, project_id: int) -> list[dict]:
 
     Returns:
         List of comments with comment_id, comment, serial and updated. The
-        `comment_id` is what edit_test_comment takes to change or remove one.
+        `comment_id` is what edit_test_comment takes to change one and
+        delete_test_comment to remove it.
     """
     return await sync_to_async(_comment_rows)(test_id, project_id)
+
+
+def _comment_text(comment: str | None) -> str:
+    """The text of a comment, which a blank one is refused as."""
+    if not (comment and comment.strip()):
+        msg = 'Pass the comment text; a comment is removed by its delete tool.'
+        raise ValidationError({'comment': msg})
+    return comment
 
 
 @mcp_auth_required(action=MANAGE_TEST_COMMENTS)
 async def edit_test_comment(
     test_id: int,
     project_id: int,
-    comment: str | None = None,
+    comment: str,
     comment_id: int | None = None,
 ) -> dict:
     """
-    Add, change or remove a comment on a test, acting as the caller.
+    Add a comment to a test, or change one, acting as the caller.
 
-    What happens follows from the arguments: text without `comment_id` adds
-    a new comment; text with `comment_id` replaces that comment (its position
-    is kept, its id changes); `comment_id` without text removes it.
+    Without `comment_id` the text is added as a new comment; with it, the
+    text replaces that comment (its position is kept, its id changes).
     `comment_id` is the id shown in get_run_overview's Comments column or by
     get_test_comments; `test_id` and `project_id` come from the same overview.
+    To remove a comment use delete_test_comment.
 
     Requires an access token and the `manage_test_comments` permission.
 
     Args:
         test_id: The test
         project_id: The project the comment belongs to
-        comment: The comment text; omit it to remove `comment_id`
-        comment_id: The comment to change or remove; omit it to add a new one
+        comment: The comment text, not blank
+        comment_id: The comment to change; omit it to add a new one
 
     Returns:
-        The resulting comment, or `{'removed': comment_id}` after a removal
+        The resulting comment
     """
 
     def _edit():
-        has_text = bool(comment and comment.strip())
+        text = _comment_text(comment)
         if comment_id is None:
-            if not has_text:
-                msg = 'Pass the comment text to add a comment.'
-                raise ValidationError(msg)
             return _comment_row(
-                TestCommentService.add(
-                    test_id=test_id,
-                    project_id=project_id,
-                    comment=comment,
-                ),
+                TestCommentService.add(test_id=test_id, project_id=project_id, comment=text),
             )
-
         metatest = TestCommentService.get(test_id, project_id, comment_id)
-        if not has_text:
-            TestCommentService.delete(metatest)
-            return {'removed': comment_id}
-        return _comment_row(TestCommentService.update(metatest, comment))
+        return _comment_row(TestCommentService.update(metatest, text))
+
+    return await sync_to_async(_edit)()
+
+
+@mcp_auth_required(action=MANAGE_TEST_COMMENTS)
+async def delete_test_comment(test_id: int, project_id: int, comment_id: int) -> dict:
+    """
+    Remove a comment from a test for good, acting as the caller.
+
+    Requires an access token and the `manage_test_comments` permission.
+
+    Args:
+        test_id: The test
+        project_id: The project the comment belongs to
+        comment_id: The comment, as get_run_overview or get_test_comments show it
+
+    Returns:
+        `{'removed': comment_id}`
+    """
+
+    def _delete():
+        TestCommentService.delete(TestCommentService.get(test_id, project_id, comment_id))
+        return {'removed': comment_id}
+
+    return await sync_to_async(_delete)()
+
+
+@mcp_auth_required()
+async def edit_run_comment(run_id: int, comment: str) -> dict:
+    """
+    Set the comment on a run, acting as the caller.
+
+    A run has at most one comment: the text replaces the one there is, or is
+    added when there is none. To remove the comment use delete_run_comment.
+    Requires an access token.
+
+    Args:
+        run_id: The run
+        comment: The comment text, not blank
+
+    Returns:
+        The run id and its comment
+    """
+
+    def _edit():
+        result = RunService.create_run_comment(run_id, _comment_text(comment))
+        return {'run_id': run_id, 'comment': result.comment}
 
     return await sync_to_async(_edit)()
 
 
 @mcp_auth_required()
-async def edit_run_comment(run_id: int, comment: str | None = None) -> dict:
+async def delete_run_comment(run_id: int) -> dict:
     """
-    Set or remove the comment on a run, acting as the caller.
+    Remove the comment of a run for good, acting as the caller.
 
-    A run has at most one comment. Text replaces whatever is there, adding
-    the comment when there is none; omitting the text removes the comment.
     Requires an access token.
 
     Args:
         run_id: The run
-        comment: The comment text; omit it to remove the run's comment
 
     Returns:
-        The run id and its resulting comment (None once removed)
+        The run id and `comment: None`; refused when the run has no comment
     """
 
-    def _edit():
-        if comment and comment.strip():
-            result = RunService.create_run_comment(run_id, comment)
-            return {'run_id': run_id, 'comment': result.comment}
-        # Raises only when there is no comment, which is already the goal.
-        with contextlib.suppress(ValidationError):
-            RunService.delete_run_comment(run_id)
+    def _delete():
+        RunService.delete_run_comment(run_id)
         return {'run_id': run_id, 'comment': None}
 
-    return await sync_to_async(_edit)()
+    return await sync_to_async(_delete)()
 
 
 @mcp_auth_required()
@@ -869,7 +905,9 @@ async def set_run_compromised(
     )
 
 
-# Config tools. Admin only, reads included, like the REST endpoints.
+# Config tools. Admin only, reads included. The REST API is laxer with the
+# reads: a project may open its configs with `read_configs`, and the schema
+# needs no login.
 
 
 def _config_data(config) -> dict:
@@ -895,7 +933,7 @@ async def list_configs(project_id: int | None = None) -> dict:
     """
 
     def _list():
-        configs = ConfigManagementService.list(project_id)
+        configs = ConfigManagementService.list_configs(project_id)
         return {
             'configs': ConfigManagementService.summarize(configs),
             'available_types_names': ConfigManagementService.available_types_names(),
@@ -1141,6 +1179,18 @@ def _query(given: dict) -> MultiValueDict:
     return query
 
 
+def _ordering(ordering: str | None, fields) -> str | None:
+    """
+    The ordering a list tool was asked for. An unknown field is refused here:
+    the services leave one out, as the REST `ordering` parameter does, and a
+    model would take the default order for the one it asked for.
+    """
+    if ordering is not None and ordering.removeprefix('-') not in fields:
+        msg = f"Expected any of: {', '.join(fields)}, with '-' for descending."
+        raise ValidationError({'ordering': msg})
+    return ordering
+
+
 def _paginated_result_details(queryset, page, page_size) -> dict:
     paged = PaginatedResult.paginate_queryset(queryset, page, page_size)
     return {
@@ -1220,9 +1270,9 @@ async def list_issues(  # noqa: PLR0913, PLR0917
             'updated_after': updated_after,
             'updated_before': updated_before,
         }
-        queryset = IssueManagementService.list(
+        queryset = IssueManagementService.list_issues(
             _query({**filters, **dates}),
-            ordering,
+            _ordering(ordering, IssueManagementService.ORDERING_FIELDS),
             test_name,
         )
         paged = PaginatedResult.paginate_queryset(queryset, page, page_size)
@@ -1523,7 +1573,10 @@ async def list_issue_rules(  # noqa: PLR0913, PLR0917
             ignore_verdicts,
             parameters,
         )
-        queryset = IssueRuleManagementService.list(query, ordering)
+        queryset = IssueRuleManagementService.list_rules(
+            query,
+            _ordering(ordering, IssueRuleManagementService.ORDERING_FIELDS),
+        )
         paged = PaginatedResult.paginate_queryset(queryset, page, page_size)
         listed = {
             'pagination': paged['pagination'],
@@ -1770,7 +1823,6 @@ async def apply_run_rules(run_id: int) -> dict:
         run = RunService.get_run(run_id)
         actor = authorize_action(MANAGE_ISSUES, [run.project_id])
         created = ClassificationService.apply_active_rules_manual(run, actor=actor)
-        RunCache.delete_data_for_obj(run, data_keys=RunCache.KEYS_CLASSIFICATION_AFFECTED)
         return {'stamps_created': created}
 
     return await sync_to_async(_apply)()
@@ -2060,7 +2112,9 @@ MCP_TOOLS = [
 # Tools that write; each requires a caller.
 MCP_WRITE_TOOLS = [
     edit_test_comment,
+    delete_test_comment,
     edit_run_comment,
+    delete_run_comment,
     set_run_compromised,
     classify_results,
     unclassify_results,
@@ -2076,6 +2130,7 @@ MCP_WRITE_TOOLS = [
 # The action a write tool needs permitted, in the projects it changes.
 MCP_TOOL_ACTIONS = {
     edit_test_comment: MANAGE_TEST_COMMENTS,
+    delete_test_comment: MANAGE_TEST_COMMENTS,
     classify_results: MANAGE_ISSUES,
     unclassify_results: MANAGE_ISSUES,
     apply_run_rules: MANAGE_ISSUES,

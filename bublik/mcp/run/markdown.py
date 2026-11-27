@@ -213,9 +213,9 @@ def render_run_overview(
                 'executions -- pass their Result ID to `get_run_leaf_results`.*'
             ),
             (
-                '*Comments are shown as `[comment_id] text`. To add, change or remove '
-                "one, pass the row's Test ID and the Project ID above to "
-                '`edit_test_comment`.*'
+                '*Comments are shown as `[comment_id] text`. To add or change one, '
+                "pass the row's Test ID and the Project ID above to "
+                '`edit_test_comment`; `delete_test_comment` removes one.*'
             ),
         ],
     )

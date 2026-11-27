@@ -48,7 +48,7 @@ class ConfigManagementService:
             raise NotFoundError(msg) from e
 
     @staticmethod
-    def list(project_id: int | str | None = None):
+    def list_configs(project_id: int | str | None = None):
         """
         Every version of every config, or of the configs of one project.
 
@@ -85,7 +85,7 @@ class ConfigManagementService:
         config is visible.
         """
         if configs is None:
-            configs = ConfigManagementService.list()
+            configs = ConfigManagementService.list_configs()
 
         if is_admin(user):
             return configs

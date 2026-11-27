@@ -459,17 +459,12 @@ class HistoryService:
                 result_types.split(query_delimiter),
             )
 
-        # Filter by classification category and issue ID, in one filter() call,
-        # so that both hold for the same stamp: a stamp of the issue in one of
-        # the categories, not a stamp of the issue and another one of the
-        # category.
-        stamp_query = {}
-        if categories:
-            stamp_query['rule_results__issue_rule__category__in'] = parse_categories(categories)
-        if issue:
-            stamp_query['rule_results__issue_rule__issue_id__in'] = parse_issue_ids(issue)
-        if stamp_query:
-            test_results = test_results.filter(**stamp_query).distinct()
+        # Filter by classification category and issue ID
+        if issue or categories:
+            test_results = test_results.stamped_under(
+                parse_issue_ids(issue) if issue else None,
+                parse_categories(categories) if categories else None,
+            ).distinct()
 
         # Filter by presence of any classification
         if explained and HistoryService._parse_flag(explained, 'explained'):

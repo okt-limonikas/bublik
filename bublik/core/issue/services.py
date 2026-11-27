@@ -131,15 +131,15 @@ def _filtered(filterset_class, queryset, query_params):
 
 def _ordered(queryset, ordering, ordering_fields):
     """
-    The queryset in the order asked for: one of `ordering_fields`, with '-'
-    for descending. The ID keeps the rows tying on it in a fixed order, so
-    paging stays stable.
+    The queryset in the order asked for, as the REST `ordering` parameter
+    gives it: fields of `ordering_fields` separated by commas, with '-' for
+    descending. A field that is not among them is left out, and the newest
+    come first when none is left. The ID keeps the rows tying on them in a
+    fixed order, so paging stays stable.
     """
-    ordering = ordering or '-created_at'
-    if ordering.removeprefix('-') not in ordering_fields:
-        msg = f"Expected any of: {', '.join(ordering_fields)}, with '-' for descending."
-        raise ValidationError({'ordering': msg})
-    return queryset.order_by(ordering, '-id')
+    terms = [term.strip() for term in (ordering or '').split(',')]
+    terms = [term for term in terms if term.removeprefix('-') in ordering_fields]
+    return queryset.order_by(*(terms or ['-created_at']), '-id')
 
 
 def _grouped_counts(qs, group_field, count_field='id'):
@@ -266,15 +266,19 @@ class IssueManagementService:
     ORDERING_FIELDS = ('created_at', 'updated_at', 'title', 'state', 'result_count')
 
     @staticmethod
-    def list(query_params, ordering: str | None = None, test_name: str | None = None):
+    def list_issues(
+        query_params,
+        ordering: str | None = None,
+        test_name: str | None = None,
+    ):
         """
         The issues a list shows, narrowed by the list filters.
 
         Args:
             query_params: The filters IssueFilterSet reads (a QueryDict, or
                 any MultiValueDict)
-            ordering: One of ORDERING_FIELDS, with '-' for descending;
-                newest first without it
+            ordering: ORDERING_FIELDS separated by commas, with '-' for
+                descending; newest first without it
             test_name: Only the issues the results of this test are
                 classified under, in the project of the filters if any
 
@@ -282,7 +286,7 @@ class IssueManagementService:
             QuerySet of issues with their counters and active rules
 
         Raises:
-            ValidationError: if a filter value or the ordering is not valid
+            ValidationError: if a filter value is not valid
             NotFoundError: if there is no test called `test_name`
         """
         issues = _ordered(
@@ -431,21 +435,21 @@ class IssueRuleManagementService:
     ORDERING_FIELDS = ('created_at', 'category', 'active', 'test_name', 'issue_title')
 
     @staticmethod
-    def list(query_params, ordering: str | None = None):
+    def list_rules(query_params, ordering: str | None = None):
         """
         The rules a list shows, narrowed by the list filters.
 
         Args:
             query_params: The filters IssueRuleFilterSet reads (a QueryDict,
                 or any MultiValueDict)
-            ordering: One of ORDERING_FIELDS, with '-' for descending;
-                newest first without it
+            ordering: ORDERING_FIELDS separated by commas, with '-' for
+                descending; newest first without it
 
         Returns:
             QuerySet of rules with their issues and tests
 
         Raises:
-            ValidationError: if a filter value or the ordering is not valid
+            ValidationError: if a filter value is not valid
         """
         return _ordered(
             _filtered(IssueRuleFilterSet, rules_queryset(), query_params),

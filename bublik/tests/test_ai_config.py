@@ -60,6 +60,9 @@ _DISCOVERY_TEST_CACHES = {
 _API_URL = 'http://localhost:9/v1'
 # Types retired from the schema enum when their pydantic-ai class had a
 # fixed endpoint; such vendors are configured as type 'openai' + api_url.
+# pydantic-ai gives these classes a base URL now. They stay retired on
+# purpose for the time being: bringing them back changes what a config may
+# say, and is left to a change of its own.
 _FIXED_ENDPOINT_TYPES = (
     'openrouter',
     'cohere',

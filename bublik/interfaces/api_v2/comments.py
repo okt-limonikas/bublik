@@ -4,7 +4,6 @@
 import typing
 
 from rest_framework import status
-from rest_framework.mixins import DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -16,7 +15,7 @@ from bublik.data.serializers import (
 )
 
 
-class TestCommentViewSet(DestroyModelMixin, GenericViewSet):
+class TestCommentViewSet(GenericViewSet):
     serializer_class = MetaTestSerializer
     filter_backends: typing.ClassVar[list] = [ProjectFilterBackend]
 
@@ -29,9 +28,11 @@ class TestCommentViewSet(DestroyModelMixin, GenericViewSet):
         )
 
     def get_object(self):
-        queryset = self.get_queryset()
-        filter_kwargs = {'meta': self.kwargs.get('pk')}
-        return queryset.get(**filter_kwargs)
+        return TestCommentService.get(
+            test_id=self.kwargs.get('test_id'),
+            project_id=self.request.query_params.get('project'),
+            comment_id=self.kwargs.get('pk'),
+        )
 
     @check_action_permission('manage_test_comments')
     def create(self, request, *args, **kwargs):
@@ -66,4 +67,5 @@ class TestCommentViewSet(DestroyModelMixin, GenericViewSet):
         """
         Request: DELETE tests/<test_id>/comments/<meta_id>/?project=<project_id>.
         """
-        return super().destroy(request, *args, **kwargs)
+        TestCommentService.delete(self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
